@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 import { Client, GatewayIntentBits, Events } from 'discord.js';
 const client = new Client({
   intents: [
@@ -62,5 +64,3 @@ client.on(Events.MessageCreate, msg => {
     safeMessage(msg, 'pong!', 'reply', { silent: false, delay: 0 });
   }
 });
-
-client.login(process.env.BOT_TOKEN);

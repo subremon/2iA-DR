@@ -1,6 +1,7 @@
-// ExpressとDiscord.jsをインポート
+// Discord.jsとExpressをインポート
+require('dotenv').config();
 const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Events } = require('discord.js');
 
 // Discordクライアントの作成
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -10,8 +11,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Discordボットの準備完了時にログを出力
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+client.once(Events.ClientReady, c => {
+  console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 // Expressサーバーのルートエンドポイント
@@ -20,20 +21,20 @@ app.get('/', (req, res) => {
 });
 
 // ボットとサーバーを同時に起動
-async function startServer() {
+async function start() {
   try {
-    // Discordボットにログイン
-    await client.login(process.env.DISCORD_TOKEN);
-    console.log('Discord bot logged in successfully.');
-
-    // Expressサーバーを起動
+    // Expressサーバーを先に起動
     app.listen(PORT, () => {
       console.log(`Express server is listening on port ${PORT}`);
     });
+    
+    // Discordボットにログイン
+    await client.login(process.env.BOT_TOKEN);
+
   } catch (error) {
     console.error('Error starting server or logging in to Discord:', error);
   }
 }
 
 // サーバー起動関数を実行
-startServer();
+start();
