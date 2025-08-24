@@ -6,6 +6,9 @@ const { Client, GatewayIntentBits, Events } = require('discord.js');
 // Discordクライアントの作成
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+// ここにmain.jsを読み込む
+require('./main.js'); 
+
 // Expressアプリケーションの作成
 const app = express();
 const PORT = process.env.PORT || 3000;
