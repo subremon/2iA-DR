@@ -1,3 +1,6 @@
+
+console.log(process.env.BOT_TOKEN);
+
 import { Client, GatewayIntentBits, Events } from 'discord.js';
 const client = new Client({
   intents: [
@@ -63,5 +66,4 @@ client.on(Events.MessageCreate, msg => {
   }
 });
 
-console.log(process.env.BOT_TOKEN)
 client.login(process.env.BOT_TOKEN);
