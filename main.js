@@ -8,8 +8,6 @@ const client = new Client({
   ],
 });
 
-client.login(process.env.BOT_TOKEN);
-
 client.on(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -64,3 +62,5 @@ client.on(Events.MessageCreate, msg => {
     safeMessage(msg, 'pong!', 'reply', { silent: false, delay: 0 });
   }
 });
+
+client.login(process.env.BOT_TOKEN);
