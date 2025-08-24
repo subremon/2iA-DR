@@ -1,6 +1,3 @@
-
-console.log(process.env.BOT_TOKEN);
-
 import { Client, GatewayIntentBits, Events } from 'discord.js';
 const client = new Client({
   intents: [
