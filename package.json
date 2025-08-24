@@ -1,0 +1,21 @@
+{
+  "name": "twoinall",
+  "version": "4.0.0",
+  "description": "This is a Discord bot.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.22.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "author": "hantomme",
+  "license": "CC0-1.0"
+}
