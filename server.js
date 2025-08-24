@@ -2,9 +2,14 @@
 require('dotenv').config();
 const express = require('express');
 const { Client, GatewayIntentBits, Events } = require('discord.js');
-
-// Discordクライアントの作成
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent
+  ],
+});
 
 // ここにmain.jsを読み込む
 require('./main.js'); 

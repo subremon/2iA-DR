@@ -1,15 +1,3 @@
-require('dotenv').config();
-
-const { Client, GatewayIntentBits, Events } = require('discord.js');
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent
-  ],
-});
-
 client.on(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -53,7 +41,7 @@ function safeMessage (msg, text, type = 'send', silent = false, delay = 0) { // 
   }, delay);
 }
 
-client.on(Events.MessageCreate, msg => {
+client.on(Events.MessageCreate, (msg) => {
   console.log(msg);
   if (msg.author.bot) { return; }
 
