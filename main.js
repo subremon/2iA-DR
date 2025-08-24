@@ -63,4 +63,4 @@ client.on(Events.MessageCreate, msg => {
   }
 });
 
-client.login(process.env.BOT_TOKEN);
+console.log(process.env.BOT_TOKEN);
