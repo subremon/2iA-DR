@@ -54,7 +54,7 @@ function safeMessage (msg, text, type = 'send', silent = false, delay = 0) { // 
 }
 
 client.on(Events.MessageCreate, msg => {
-  if (msg.author.bot) return;
+  if (msg.author.bot) { return; }
 
   if (msg.mentions.users.has(client.user.id)) {
     safeMessage(msg, ':sob:', { silent: true, delay: TYPING_DELAY });
