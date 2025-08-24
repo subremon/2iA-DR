@@ -10,6 +10,10 @@ const client = new Client({
   ],
 });
 
+client.once(Events.ClientReady, c => {
+  console.log(`Ready! Logged in as ${c.user.tag}`);
+});
+
 client.on(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
