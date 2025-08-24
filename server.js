@@ -1,18 +1,6 @@
 // Discord.jsとExpressをインポート
 require('dotenv').config();
 const express = require('express');
-const { Client, GatewayIntentBits, Events } = require('discord.js');
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent
-  ],
-});
-
-// ここにmain.jsを読み込む
-require('./main.js'); 
 
 // Expressアプリケーションの作成
 const app = express();
@@ -35,10 +23,9 @@ async function start() {
     app.listen(PORT, () => {
       console.log(`Express server is listening on port ${PORT}`);
     });
+    // ここにmain.jsを読み込む
+    require('./main.js'); 
     
-    // Discordボットにログイン
-    await client.login(process.env.BOT_TOKEN);
-
   } catch (error) {
     console.error('Error starting server or logging in to Discord:', error);
   }

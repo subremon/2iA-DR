@@ -1,3 +1,15 @@
+require('dotenv').config();
+
+const { Client, GatewayIntentBits, Events } = require('discord.js');
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent
+  ],
+});
+
 client.on(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -53,3 +65,6 @@ client.on(Events.MessageCreate, (msg) => {
     safeMessage(msg, 'pong!', 'reply', false, 0);
   }
 });
+
+// Discordボットにログイン
+await client.login(process.env.BOT_TOKEN);
