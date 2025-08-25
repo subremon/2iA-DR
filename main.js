@@ -8,7 +8,7 @@ const client = new Client({
   ],
 });
 
-const SafeMessage = require('./functions/safeMessage.js');
+const SafeMessage = require('./functions/safety.js');
 
 //// ^^モジュール^^ ////
 
