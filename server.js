@@ -11,6 +11,53 @@ const client = new Client({
   ],
 });
 
+const { Client: PGClient } = require('pg');
+
+async function connectToDatabases() {
+  const bankDBClient = new PGClient({
+    user: process.env.BANK_DB_USER,
+    host: process.env.BANK_DB_HOST,
+    database: process.env.BANK_DB_NAME,
+    password: process.env.BANK_DB_PASSWORD,
+    port: process.env.BANK_DB_PORT,
+  });
+
+  const settingsDBClient = new PGClient({
+    user: process.env.SETTINGS_DB_USER,
+    host: process.env.SETTINGS_DB_HOST,
+    database: process.env.SETTINGS_DB_NAME,
+    password: process.env.SETTINGS_DB_PASSWORD,
+    port: process.env.SETTINGS_DB_PORT,
+  });
+
+  try {
+    await bankDBClient.connect();
+    console.log('Bankデータベースに接続しました。');
+
+    await settingsDBClient.connect();
+    console.log('Settingsデータベースに接続しました。');
+
+    return { bankDBClient, settingsDBClient };
+  } catch (err) {
+    console.error('データベース接続エラー:', err);
+    throw err;
+  }
+}
+
+// server.jsのinteractionCreateイベント内
+client.on('interactionCreate', async interaction => {
+  // ...
+  try {
+    const clients = await connectToDatabases(); // 接続はBOT起動時に行う
+    const command = client.commands.get(interaction.commandName);
+    if (command) {
+      await command.execute(interaction, clients); // 複数のクライアントを渡す
+    }
+  } catch (error) {
+    // ...
+  }
+});
+
 client.on(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
