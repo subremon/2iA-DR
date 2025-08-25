@@ -92,7 +92,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     }
 })();
 
-require('main.js');
+require('./main');
 
 // Expressアプリケーションの作成
 const app = express();
