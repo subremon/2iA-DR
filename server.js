@@ -71,7 +71,7 @@ client.once(Events.ClientReady, async c => {
   console.log(`✅ Ready! Logged in as ${c.user.tag}`);
 
   try {
-    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+    const rest = new REST().setToken(process.env.BOT_TOKEN);
     await rest.put(
       Routes.applicationCommands(c.user.id),
       { body: commands }
