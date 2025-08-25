@@ -20,7 +20,7 @@ const client = new Client({
 client.commands = new Collection();
 
 async function connectToDatabases() {
-  const bankDBClient = new PGClient({
+  const DBClient = new PGClient({
     user: process.env.BANK_DB_USER,
     host: process.env.BANK_DB_HOST,
     database: process.env.BANK_DB_NAME,
@@ -28,22 +28,11 @@ async function connectToDatabases() {
     port: process.env.BANK_DB_PORT,
   });
 
-  /* const settingsDBClient = new PGClient({
-    user: process.env.SETTING_DB_USER,
-    host: process.env.SETTING_DB_HOST,
-    database: process.env.SETTING_DB_NAME,
-    password: process.env.SETTING_DB_PASSWORD,
-    port: process.env.SETTING_DB_PORT,
-  }); */
-
   try {
-    await bankDBClient.connect();
+    await DBClient.connect();
     console.log('✅ Bankデータベースに接続しました。');
 
-    /* await settingsDBClient.connect();
-    console.log('✅ Settingsデータベースに接続しました。'); */
-
-    return { bankDBClient, /* settingsDBClient */ };
+    return { DBClient };
   } catch (err) {
     console.error('❌ データベース接続エラー:', err);
     throw err;
@@ -89,7 +78,7 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!command) return;
 
   try {
-    await command.execute(interaction, dbClients);
+    await command.execute(interaction, dbClient);
   } catch (error) {
     console.error('❌ コマンド実行エラー:', error);
     await interaction.reply({ content: 'コマンド実行中にエラーが発生しました。', ephemeral: true });
@@ -105,11 +94,11 @@ app.get('/', (req, res) => {
 require('./main')(client);
 
 // 起動処理
-let dbClients;
+let dbClient;
 
 async function initialize() {
   try {
-    dbClients = await connectToDatabases();
+    dbClient = await connectToDatabases();
 
     app.listen(PORT, () => {
       console.log(`🚀 Express server is listening on port ${PORT}`);
