@@ -1,7 +1,9 @@
 // Discord.jsとExpressをインポート
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
-const { Client, GatewayIntentBits, Events } = require('discord.js');
+const { Client, REST, Routes, GatewayIntentBits, Events } = require('discord.js');
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -58,60 +60,39 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-client.on(Events.ClientReady, () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
+const commands = [];
+// コマンドファイルが存在するディレクトリのパスを指定
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-const TYPING_DELAY = 1000; // 型付けインジケーターの表示時間(ms)
-
-/**
- * 安全にメッセージを送信するためのヘルパー関数
- * @param {object} msg - Discordメッセージオブジェクト
- * @param {string} text - 送信するテキスト
- * @param {string} type - 'send', 'reply', 'dm' のいずれか
- * @param {boolean} silent - サイレントメッセージかどうか
- * @param {number} delay - 送信前の遅延時間(ms)
- */
-function safeMessage (msg, text, type = 'send', silent = false, delay = 0) { // embeds, components, stickers, files, attachments, tts, silent, nonce, flags を後で追加
-  const messageOptions = { content: text, silent };
-
-  // DMの場合
-  if (!msg.guild || type === 'dm') {
-    return msg.author.send(messageOptions).catch(console.error);
-  }
-
-  // ギルド（サーバー）の場合
-  const botPermissions = msg.channel.permissionsFor(client.user.id);
-  if (!botPermissions.has('SEND_MESSAGES')) {
-    return console.log(`Sorry, I cannot send message in ${msg.channel.id}`); // デバッグ用(後で消す)
-  }
-  
-  // 待機処理
-  if (delay > 0) {
-    msg.channel.sendTyping();
-  }
-
-  // サーバーメッセージ送信
-  setTimeout(() => { 
-    if (type === 'send') {
-      msg.channel.send(messageOptions);
-    } else if (type === 'reply') {
-      msg.reply(messageOptions); 
+for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = require(filePath);
+    if ('data' in command && 'execute' in command) {
+        commands.push(command.data.toJSON());
+    } else {
+        console.log(`[WARNING] ${filePath} には 'data' または 'execute' プロパティがありません。`);
     }
-  }, delay);
 }
 
-client.on(Events.MessageCreate, (msg) => {
-  if (msg.author.bot) { return; }
+const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
-  if (msg.mentions.users.has(client.user.id)) {
-    safeMessage(msg, ':sob:', 'send', true, TYPING_DELAY);
-  }
+(async () => {
+    try {
+        console.log(`[INFO] ${commands.length} 個のアプリケーションコマンドを登録します。`);
 
-  if (msg.content === 'ping') {
-    safeMessage(msg, 'pong!', 'reply', false, 0);
-  }
-});
+        await rest.put(
+            Routes.applicationCommands(process.env.CLIENT_ID),
+            { body: commands }
+        );
+
+        console.log(`[INFO] コマンドを正常に登録しました。`);
+    } catch (error) {
+        console.error(error);
+    }
+})();
+
+require('main.js');
 
 // Expressアプリケーションの作成
 const app = express();
