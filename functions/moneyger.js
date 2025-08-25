@@ -22,7 +22,7 @@ async function MoneyPay(dbClient, interaction, pointO, dummyG, dummyT, unlimit =
     const uni = uniResult.rows[0]?.currency_name || 'P';
 
     // 贈与者と授与者のIDとポイントを取得
-    const giverId = dummyG || interaction.user.id;
+    const giverId = dummyG || interaction.userId;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
     const point = pointO || interaction.options.getNumber("point");
 
