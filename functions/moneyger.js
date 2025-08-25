@@ -10,21 +10,23 @@ const errors = {
  * @param {object} dbClient - PostgreSQLデータベースクライアント
  * @param {object} interaction - Discordインタラクションオブジェクト
  * @param {Number} pointO - pointのオーバーライド
+ * @param {string} guildO - ギルドIDのオーバーライド
  * @param {string} dummyG - 贈与者IDのオーバーライド
  * @param {string} dummyT - 授与者IDのオーバーライド
  * @param {boolean} unlimit - trueなら贈与者が無から資金を提供
  * @param {boolean} overlimit - trueなら贈与者が所持金がマイナスでも支払い続けられる
  */
-async function MoneyPay(dbClient, interaction, pointO, dummyG, dummyT, unlimit = false, overlimit = false) {
+async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
   try {
-    // サーバーごとの通貨名を取得
-    const uniResult = await dbClient.query('SELECT currency_name FROM server_settings WHERE server_id = $1', [interaction.guild.id]);
-    const uni = uniResult.rows[0]?.currency_name || 'P';
-
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.userId;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
     const point = pointO || interaction.options.getNumber("point");
+    const guildId = guildO || interaction.guild.id;
+    
+    // サーバーごとの通貨名を取得
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uni = uniResult.rows[0]?.currency_name || 'P';
 
     // ユーザーIDが存在しない場合はエラー
     if (!takerId) {
@@ -34,21 +36,22 @@ async function MoneyPay(dbClient, interaction, pointO, dummyG, dummyT, unlimit =
       return ['fail', 'ポイントは0より大きい値を指定してください。'];
     }
 
+    const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
+
     // 贈与者と授与者の口座情報を取得
-    const giverResult = await dbClient.query('SELECT balance FROM user_balances WHERE user_id = $1', [giverId]);
-    const takerResult = await dbClient.query('SELECT balance FROM user_balances WHERE user_id = $1', [takerId]);
+    const giverResult = await dbClient.query(SELECTUSER, [guildId, giverId]);
+    const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
-    const giver = giverResult.rows[0];
-    const taker = takerResult.rows[0];
-
-    // 口座が存在しない場合はエラー
-    if (!giver || !taker) {
-      return ['error', errors.missingBank];
-    }
+    const giverUPSERT = giverResult.rows.length === 0 ? 
+    `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
+    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
+    const takerUPSERT= giverResult.rows.length === 0 ? 
+    `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
+    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
     // 新しい所持金を計算
-    const giverHave = giver.balance;
-    const takerHave = taker.balance;
+    const giverHave = giverResult.rows[0]?.have_money || 100;
+    const takerHave = takerResult?.rows[0]?.have_money || 100;
 
     const giverNew = unlimit ? giverHave : giverHave - point;
     if (giverNew < 0 && !overlimit) {
@@ -60,16 +63,16 @@ async function MoneyPay(dbClient, interaction, pointO, dummyG, dummyT, unlimit =
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query('UPDATE user_balances SET balance = $1 WHERE user_id = $2', [giverNew, giverId]);
+      await dbClient.query(giverUPSERT, [guildId, giverId, giverNew]);
       // 授与者の残高を更新
-      await dbClient.query('UPDATE user_balances SET balance = $1 WHERE user_id = $2', [takerNew, takerId]);
+      await dbClient.query(takerUPSERT, [guildId, takerId, takerNew]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
       throw dbError;
     }
 
-    return ['succes', giverId, takerId, point];
+    return ['success', giverId, takerId, point];
 
   } catch (error) {
     console.error('データベース操作エラー:', error);

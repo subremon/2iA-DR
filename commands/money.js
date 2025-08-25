@@ -38,7 +38,7 @@ module.exports = {
       const result = await MoneyPay(dbClient, interaction);
 
       // 応答の処理（以前の回答と同じ）
-      if (result[0] === 'succes') {
+      if (result[0] === 'success') {
         const giverId = result[1];
         const takerId = result[2];
         const point = result[3];
