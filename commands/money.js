@@ -32,7 +32,7 @@ module.exports = {
     // 実行されたサブコマンドの名前を取得
     const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === 'pay') {
+    if (subcommand === 'give') {
       // payサブコマンドが実行された場合の処理
       // MoneyPay関数を呼び出し、結果を待つ
       const result = await MoneyPay(dbClient, interaction);
