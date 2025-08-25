@@ -10,7 +10,7 @@ module.exports = function(client) {
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) {return;}
 
-      if (msg.mentions.users.has(client.userId)) {
+      if (msg.mentions.users.has(client.user.id)) {
         SafeMessage(client, msg, ':sob:', 'send', true, TYPING_DELAY);
       }
 
