@@ -77,7 +77,7 @@ async function MoneyPay(dbClient, interaction, pointO, dummyG, dummyT, unlimit =
   }
 }
 
-export default MoneyPay; // ここが重要
+module.exports = MoneyPay; // ここが重要
 
   
 

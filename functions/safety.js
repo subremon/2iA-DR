@@ -45,4 +45,4 @@ function SafeMessage (msg, text, type = 'send', silent = false, delay = 0) { // 
   }, delay);
 }
 
-export default SafeMessage;
+module.exports = SafeMessage;
