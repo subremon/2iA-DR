@@ -68,6 +68,7 @@ client.once(Events.ClientReady, async c => {
     console.log(`[INFO] コマンドを正常に登録しました。`);
   } catch (error) {
     console.error(error);
+    throw error;
   }
 });
 
@@ -81,7 +82,7 @@ client.on(Events.InteractionCreate, async interaction => {
     await command.execute(interaction, dbClient);
   } catch (error) {
     console.error('❌ コマンド実行エラー:', error);
-    await interaction.reply({ content: 'コマンド実行中にエラーが発生しました。', ephemeral: true });
+    throw error;
   }
 });
 
