@@ -1,8 +1,3 @@
-const Client = require('pg');
-const client = new Client();
- 
-await client.connect();
-
 const errors = {
   missingUser: "エラー: 不明なユーザーID。\nその人が存在するか確認しください。",
   missingBank: "その人の口座はまだ作成されていません。"
@@ -21,6 +16,8 @@ const errors = {
  */
 async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
   try {
+    await dbClient.connect();
+
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.userId;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
