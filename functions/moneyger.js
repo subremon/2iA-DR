@@ -16,6 +16,8 @@ const errors = {
  */
 async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
   try {
+    await dbClient.connect();
+
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.userId;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
