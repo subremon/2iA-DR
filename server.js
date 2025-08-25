@@ -20,7 +20,7 @@ const client = new Client({
 client.commands = new Collection();
 
 async function connectToDatabases() {
-  const DBClient = new PGClient({
+  const dbClient = new PGClient({
     user: process.env.BANK_DB_USER,
     host: process.env.BANK_DB_HOST,
     database: process.env.BANK_DB_NAME,
@@ -29,10 +29,10 @@ async function connectToDatabases() {
   });
 
   try {
-    await DBClient.connect();
+    await dbClient.connect();
     console.log('✅ Bankデータベースに接続しました。');
 
-    return { DBClient };
+    return { dbClient };
   } catch (err) {
     console.error('❌ データベース接続エラー:', err);
     throw err;
