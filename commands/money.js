@@ -23,8 +23,8 @@ module.exports = {
           option.setName('point')
             .setDescription('Amounts of points')
             .setDescriptionLocalization(Locale.Japanese, 'いくら送るか')
-            .addMinValue(0)
-            .addMaxValue(90072)
+            .setMinValue(0)
+            .setMaxValue(90072)
             .setRequired(true))),
 
   // コマンド実行時の処理
