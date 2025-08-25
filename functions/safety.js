@@ -17,9 +17,11 @@ function SafeMessage (client, msg, text, type = 'send', silent = false, delay = 
   }
 
   // ギルド（サーバー）の場合
-  const botPermissions = msg.channel.permissionsFor(msg.guild.me);
-  if (!botPermissions.has('SEND_MESSAGES')) {
-    return console.log(`Sorry, I cannot send message in ${msg.channel}`); // デバッグ用(後で消す)
+  const botPermissions = msg.channel.permissionsFor(msg.client.user?.id);
+
+  if (!botPermissions || !botPermissions.has('SendMessages')) {
+    console.log(`❌ Botはこのチャンネルでメッセージを送信できません: ${msg.channel.name}`);
+    return;
   }
   
   // 待機処理
