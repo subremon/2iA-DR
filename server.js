@@ -23,11 +23,11 @@ async function connectToDatabases() {
   });
 
   const settingsDBClient = new PGClient({
-    user: process.env.SETTINGS_DB_USER,
-    host: process.env.SETTINGS_DB_HOST,
-    database: process.env.SETTINGS_DB_NAME,
-    password: process.env.SETTINGS_DB_PASSWORD,
-    port: process.env.SETTINGS_DB_PORT,
+    user: process.env.SETTING_DB_USER,
+    host: process.env.SETTING_DB_HOST,
+    database: process.env.SETTING_DB_NAME,
+    password: process.env.SETTING_DB_PASSWORD,
+    port: process.env.SETTING_DB_PORT,
   });
 
   try {
