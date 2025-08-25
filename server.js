@@ -32,7 +32,7 @@ async function connectToDatabases() {
     await dbClient.connect();
     console.log('✅ Bankデータベースに接続しました。');
 
-    return { dbClient };
+    return dbClient;
   } catch (err) {
     console.error('❌ データベース接続エラー:', err);
     throw err;
