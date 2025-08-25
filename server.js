@@ -46,17 +46,27 @@ async function connectToDatabases() {
   }
 }
 
+let dbClients;
+
+async function start() {
+    try {
+        dbClients = await connectToDatabases();
+        // ...
+    } catch (err) {
+      throw err;
+    }
+}
+
 // server.jsのinteractionCreateイベント内
 client.on('interactionCreate', async interaction => {
   // ...
   try {
-    const clients = await connectToDatabases(); // 接続はBOT起動時に行う
     const command = client.commands.get(interaction.commandName);
     if (command) {
       await command.execute(interaction, clients); // 複数のクライアントを渡す
     }
   } catch (error) {
-    // ...
+    throw err;
   }
 });
 
@@ -77,20 +87,18 @@ for (const file of commandFiles) {
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
-(async () => {
+client.once(Events.ClientReady, async c => {
     try {
-        console.log(`[INFO] ${commands.length} 個のアプリケーションコマンドを登録します。`);
-
+        const rest = new REST().setToken(process.env.DISCORD_TOKEN);
         await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
+            Routes.applicationCommands(c.user.id),
             { body: commands }
         );
-
         console.log(`[INFO] コマンドを正常に登録しました。`);
     } catch (error) {
         console.error(error);
     }
-})();
+});
 
 require('./main');
 
