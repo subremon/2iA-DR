@@ -28,20 +28,20 @@ async function connectToDatabases() {
     port: process.env.BANK_DB_PORT,
   });
 
-  const settingsDBClient = new PGClient({
+  /* const settingsDBClient = new PGClient({
     user: process.env.SETTING_DB_USER,
     host: process.env.SETTING_DB_HOST,
     database: process.env.SETTING_DB_NAME,
     password: process.env.SETTING_DB_PASSWORD,
     port: process.env.SETTING_DB_PORT,
-  });
+  }); */
 
   try {
     await bankDBClient.connect();
     console.log('✅ Bankデータベースに接続しました。');
 
-    await settingsDBClient.connect();
-    console.log('✅ Settingsデータベースに接続しました。');
+    /* await settingsDBClient.connect();
+    console.log('✅ Settingsデータベースに接続しました。'); */
 
     return { bankDBClient, settingsDBClient };
   } catch (err) {
