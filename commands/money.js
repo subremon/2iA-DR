@@ -28,7 +28,7 @@ module.exports = {
             .setRequired(true))),
 
   // コマンド実行時の処理
-  async execute(interaction, client, dbClient) {
+  async execute(interaction, dbClient) {
     // 実行されたサブコマンドの名前を取得
     const subcommand = interaction.options.getSubcommand();
 

@@ -1,5 +1,3 @@
-const { Client } = require('pg');
-
 const errors = {
   missingUser: "エラー: 不明なユーザーID。\nその人が存在するか確認しください。",
   missingBank: "その人の口座はまだ作成されていません。"
