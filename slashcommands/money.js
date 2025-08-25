@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-import MoneyPay from "../functions/MoneyPay.js";
+import MoneyPay from "../functions/moneyPay.js";
 
 module.exports = {
   // スラッシュコマンドの定義
