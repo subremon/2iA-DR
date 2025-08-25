@@ -43,7 +43,7 @@ async function connectToDatabases() {
     /* await settingsDBClient.connect();
     console.log('✅ Settingsデータベースに接続しました。'); */
 
-    return { bankDBClient, settingsDBClient };
+    return { bankDBClient, /* settingsDBClient */ };
   } catch (err) {
     console.error('❌ データベース接続エラー:', err);
     throw err;
