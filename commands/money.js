@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, Locale } = require('discord.js');
 const MoneyPay = require('../functions/moneyger.js');
 
 module.exports = {
