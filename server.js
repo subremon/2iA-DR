@@ -102,7 +102,6 @@ function safeMessage (msg, text, type = 'send', silent = false, delay = 0) { // 
 }
 
 client.on(Events.MessageCreate, (msg) => {
-  console.log(msg);
   if (msg.author.bot) { return; }
 
   if (msg.mentions.users.has(client.user.id)) {
