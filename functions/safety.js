@@ -1,22 +1,14 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent
-  ],
-});
-
 /**
  * 安全にメッセージを送信するためのヘルパー関数
+ * @param {client} client - DiscordClientインスタンス
  * @param {object} msg - Discordメッセージオブジェクト
  * @param {string} text - 送信するテキスト
  * @param {string} type - 'send', 'reply', 'dm' のいずれか
  * @param {boolean} silent - サイレントメッセージかどうか
  * @param {number} delay - 送信前の遅延時間(ms)
+ * @returns {Function} - SafeMessage関数
  */
-function SafeMessage (msg, text, type = 'send', silent = false, delay = 0) { // embeds, components, stickers, files, attachments, tts, silent, nonce, flags を後で追加
+function SafeMessage (client, msg, text, type = 'send', silent = false, delay = 0) { // embeds, components, stickers, files, attachments, tts, silent, nonce, flags を後で追加
   const messageOptions = { content: text, silent };
 
   // DMの場合
@@ -25,7 +17,7 @@ function SafeMessage (msg, text, type = 'send', silent = false, delay = 0) { // 
   }
 
   // ギルド（サーバー）の場合
-  const botPermissions = msg.channel.permissionsFor(client.userId);
+  const botPermissions = msg.channel.permissionsFor(client.user.id);
   if (!botPermissions.has('SEND_MESSAGES')) {
     return console.log(`Sorry, I cannot send message in ${msg.channel}`); // デバッグ用(後で消す)
   }

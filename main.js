@@ -11,11 +11,11 @@ module.exports = function(client) {
       if (msg.author.bot) {return;}
 
       if (msg.mentions.users.has(client.userId)) {
-        SafeMessage(msg, ':sob:', 'send', true, TYPING_DELAY);
+        SafeMessage(client, msg, ':sob:', 'send', true, TYPING_DELAY);
       }
 
       if (msg.content === 'ping') {
-        SafeMessage(msg, 'pong!', 'reply', false, 0);
+        SafeMessage(client, msg, 'pong!', 'reply', false, 0);
       }
     });
   });
