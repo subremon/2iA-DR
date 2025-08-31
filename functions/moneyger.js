@@ -17,7 +17,7 @@ const errors = {
 async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const giverId = dummyG || interaction.userId;
+    const giverId = dummyG || interaction.user.id;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
     const point = pointO || interaction.options.getNumber("point");
     const guildId = guildO || interaction.guild.id;
@@ -40,10 +40,10 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const giverResult = await dbClient.query(SELECTUSER, [guildId, giverId]);
     const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
-    const giverUPSERT = giverResult.rows.length === 0 ? 
+    const giverUPSERT = giverResult.rows.length <= 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
-    const takerUPSERT= giverResult.rows.length === 0 ? 
+    const takerUPSERT= giverResult.rows.length <= 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
