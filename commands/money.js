@@ -46,25 +46,48 @@ module.exports = {
       // payサブコマンドが実行された場合の処理
       // MoneyPay関数を呼び出し、結果を待つ
       const result = await MoneyPay(dbClient, interaction);
-
+      interaction.deferReply();
       // 応答の処理（以前の回答と同じ）
       if (result[0] === 'success') {
-        const userId = result[1];
-        const point = result[2];
-        const unit = result[3];
-        await interaction.reply({
-          content: `<@${userId}>は${point}${unit}を所持しています。`
+        const giverId = result[1];
+        const takerId = result[2];
+        const point = result[3];
+        const unit = result[4];
+        await interaction.editReply({
+          content: `<@${giverId}>から<@${takerId}>に${point}${unit}送りました。`
         });
       } else if (result[0] === 'fail') {
-        await interaction.reply({
+        await interaction.editReply({
           content: result[1],
           ephemeral: true
         });
       } else if (result[0] === 'error') {
-        await interaction.reply({
+        await interaction.editReply({
           content: result[1],
           ephemeral: true
         });
+      } else if (subcommand === 'have') {
+        const result = await MoneyHave(dbClient, interaction);
+        interaction.deferReply();
+
+        if (result[0] === 'success') {
+          const userId = result[1];
+          const point = result[2];
+          const unit = result[3];
+          await interaction.editReply({
+            content: `<@${userId}>は${point}${unit}を所持しています。`
+          });
+        } else if (result[0] === 'fail') {
+          await interaction.editReply({
+            content: result[1],
+            ephemeral: true
+          });
+        } else if (result[0] === 'error') {
+          await interaction.editReply({
+            content: result[1],
+            ephemeral: true
+          });
+        }
       }
     }
   },
