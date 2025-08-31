@@ -19,7 +19,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.user.id;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
-    const point = pointO || interaction.options.getInteger("point");
+    const point = pointO || Number(interaction.options.getInteger("point"));
     const guildId = guildO || interaction.guild.id;
     
     // サーバーごとの通貨名を取得
@@ -48,14 +48,14 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
     // 新しい所持金を計算
-    const giverHave = giverResult.rows[0]?.have_money || 100;
-    const takerHave = takerResult?.rows[0]?.have_money || 100;
+    const giverHave = Number(giverResult.rows[0]?.have_money) || 100;
+    const takerHave = Number(takerResult?.rows[0]?.have_money) || 100;
 
-    const giverNew = unlimit ? Number(giverHave) : Number(giverHave) - point;
+    const giverNew = unlimit ? giverHave : giverHave - point;
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
-    const takerNew = Number(takerHave) + point;
+    const takerNew = takerHave + point;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
