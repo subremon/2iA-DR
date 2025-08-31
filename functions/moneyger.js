@@ -78,7 +78,35 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
   }
 }
 
-module.exports = MoneyPay; // ここが重要
+async function MoneyHave(dbClient, interaction, pointO, guildO, dummy) {
+  try {
+    // 贈与者と授与者のIDとポイントを取得
+    const userId = dummy || interaction.options.getUser("user")?.id || interaction.user.id;
+    const guildId = guildO || interaction.guild.id;
+    
+    // サーバーごとの通貨名を取得
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uni = uniResult.rows[0]?.currency_name || 'P';
+
+    // ユーザーIDが存在しない場合はエラー
+    if (!userId) {
+      return ['error', errors.missingUser];
+    }
+
+    const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
+
+    // 贈与者と授与者の口座情報を取得
+    const userResult = await dbClient.query(SELECTUSER, [guildId, userId]);
+
+    return ['success', userId, userResult, uni];
+
+  } catch (error) {
+    console.error('データベース操作エラー:', error);
+    return ['error', '予期せぬエラーが発生しました。'];
+  }
+}
+
+module.exports = { MoneyPay, MoneyHave }; // ここが重要
 
   
 

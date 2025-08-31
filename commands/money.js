@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, Locale } = require('discord.js');
-const MoneyPay = require('../functions/moneyger.js');
+const { MoneyPay, MoneyHave } = require('../functions/moneyger.js');
 
 module.exports = {
   // スラッシュコマンドの定義
@@ -12,20 +12,30 @@ module.exports = {
     .addSubcommand(subcommand =>
       subcommand
         .setName('give')
-        .setDescription('Give points')
+        .setDescription('.')
         .setDescriptionLocalization(Locale.Japanese, 'ポイントの贈与をします。')
         .addUserOption(option =>
           option.setName('user')
-            .setDescription('Select taker')
+            .setDescription('.')
             .setDescriptionLocalization(Locale.Japanese, '誰に送るか')
             .setRequired(true))
         .addIntegerOption(option =>
           option.setName('point')
-            .setDescription('Amounts of points')
+            .setDescription('.')
             .setDescriptionLocalization(Locale.Japanese, 'いくら送るか')
             .setMinValue(0)
             .setMaxValue(90072)
-            .setRequired(true))),
+            .setRequired(true)))
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('have')
+        .setDescription('Have points')
+        .setDescriptionLocalization(Locale.Japanese, 'ポイントの確認をします。')
+        .addUserOption(option =>
+          option.setName('user')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, '誰のポイントを見るか')
+            .setRequired(false))),
 
   // コマンド実行時の処理
   async execute(interaction, dbClient) {
