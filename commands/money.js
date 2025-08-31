@@ -67,7 +67,7 @@ module.exports = {
           ephemeral: true
         });
       } else if (subcommand === 'have') {
-        const result = await MoneyPay(dbClient, interaction);
+        const result = await MoneyHave(dbClient, interaction);
 
         if (result[0] === 'success') {
           const userId = result[1];
