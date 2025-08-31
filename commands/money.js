@@ -45,8 +45,8 @@ module.exports = {
     if (subcommand === 'give') {
       // payサブコマンドが実行された場合の処理
       // MoneyPay関数を呼び出し、結果を待つ
-      const result = await MoneyPay(dbClient, interaction);
       interaction.deferReply();
+      const result = await MoneyPay(dbClient, interaction);
       // 応答の処理（以前の回答と同じ）
       if (result[0] === 'success') {
         const giverId = result[1];
@@ -67,8 +67,8 @@ module.exports = {
           ephemeral: true
         });
       } else if (subcommand === 'have') {
-        const result = await MoneyHave(dbClient, interaction);
         interaction.deferReply();
+        const result = await MoneyHave(dbClient, interaction);
 
         if (result[0] === 'success') {
           const userId = result[1];
