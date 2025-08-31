@@ -49,12 +49,11 @@ module.exports = {
 
       // 応答の処理（以前の回答と同じ）
       if (result[0] === 'success') {
-        const giverId = result[1];
-        const takerId = result[2];
-        const point = result[3];
-        const unit = result[4];
+        const userId = result[1];
+        const point = result[2];
+        const unit = result[3];
         await interaction.reply({
-          content: `<@${giverId}>から<@${takerId}>に${point}${unit}送りました。`
+          content: `<@${userId}>は${point}${unit}を所持しています。`
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({
