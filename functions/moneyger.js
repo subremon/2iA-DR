@@ -55,7 +55,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
-    const takerNew = Number(takerHave) + Number(point);
+    const takerNew = Number(takerHave) + point;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
@@ -70,7 +70,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
       throw dbError;
     }
 
-    return ['success', giverId, takerId, takerNew, uni];
+    return ['success', giverId, takerId, point, uni];
 
   } catch (error) {
     console.error('データベース操作エラー:', error);
