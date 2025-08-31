@@ -19,7 +19,7 @@ module.exports = {
             .setDescription('Select taker')
             .setDescriptionLocalization(Locale.Japanese, '誰に送るか')
             .setRequired(true))
-        .addNumberOption(option =>
+        .addIntagerOption(option =>
           option.setName('point')
             .setDescription('Amounts of points')
             .setDescriptionLocalization(Locale.Japanese, 'いくら送るか')
@@ -42,8 +42,9 @@ module.exports = {
         const giverId = result[1];
         const takerId = result[2];
         const point = result[3];
+        const unit = result[4];
         await interaction.reply({
-          content: `<@${giverId}>から<@${takerId}>に${point}ポイント送りました。`
+          content: `<@${giverId}>から<@${takerId}>に${point}${unit}送りました。`
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({

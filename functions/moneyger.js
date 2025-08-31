@@ -70,7 +70,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
       throw dbError;
     }
 
-    return ['success', giverId, takerId, point];
+    return ['success', giverId, takerId, point, uni];
 
   } catch (error) {
     console.error('データベース操作エラー:', error);
