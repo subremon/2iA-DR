@@ -49,7 +49,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
 
     // 新しい所持金を計算
     const giverHave = giverResult.rows[0]?.have_money || 100;
-    const takerHave = takerResult?.rows[0]?.have_money || 100;
+    const takerHave = takerResult.rows[0]?.have_money || 100;
 
     const giverNew = unlimit ? giverHave : giverHave - point;
     if (giverNew < 0 && !overlimit) {
