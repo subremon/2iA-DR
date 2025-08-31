@@ -51,7 +51,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const giverHave = giverResult.rows[0]?.have_money || 100;
     const takerHave = takerResult?.rows[0]?.have_money || 100;
 
-    const giverNew = unlimit ? giverHave : Number(giverHave) - Number(point);
+    const giverNew = unlimit ? giverHave : giverHave - point;
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
@@ -70,7 +70,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
       throw dbError;
     }
 
-    return ['success', giverId, takerId, point, uni];
+    return ['success', giverId, takerId, takerNew, uni];
 
   } catch (error) {
     console.error('データベース操作エラー:', error);
