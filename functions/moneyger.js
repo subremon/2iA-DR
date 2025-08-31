@@ -40,10 +40,10 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const giverResult = await dbClient.query(SELECTUSER, [guildId, giverId]);
     const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
-    const giverUPSERT = giverResult.rows.length <= 0 ? 
+    const giverUPSERT = giverResult.rows.length === 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
-    const takerUPSERT= giverResult.rows.length <= 0 ? 
+    const takerUPSERT= giverResult.rows.length === 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
@@ -55,7 +55,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
-    const takerNew = Number(takerHave) + point;
+    const takerNew = takerHave + point;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
