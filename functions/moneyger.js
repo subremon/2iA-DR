@@ -19,7 +19,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.user.id;
     const takerId = dummyT || interaction.options.getUser("user")?.id;
-    const point = pointO || interaction.options.getNumber("point");
+    const point = pointO || interaction.options.getIntegerr("point");
     const guildId = guildO || interaction.guild.id;
     
     // サーバーごとの通貨名を取得
