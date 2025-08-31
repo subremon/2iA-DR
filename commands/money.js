@@ -19,7 +19,7 @@ module.exports = {
             .setDescription('Select taker')
             .setDescriptionLocalization(Locale.Japanese, '誰に送るか')
             .setRequired(true))
-        .addIntagerOption(option =>
+        .addIntOption(option =>
           option.setName('point')
             .setDescription('Amounts of points')
             .setDescriptionLocalization(Locale.Japanese, 'いくら送るか')
