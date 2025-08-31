@@ -66,27 +66,27 @@ module.exports = {
           content: result[1],
           ephemeral: true
         });
-      } else if (subcommand === 'have') {
-        const result = await MoneyHave(dbClient, interaction);
+      } 
+    } else if (subcommand === 'have') {
+      const result = await MoneyHave(dbClient, interaction);
 
-        if (result[0] === 'success') {
-          const userId = result[1];
-          const point = result[2];
-          const unit = result[3];
-          await interaction.reply({
-            content: `<@${userId}>は${point}${unit}を所持しています。`
-          });
-        } else if (result[0] === 'fail') {
-          await interaction.reply({
-            content: result[1],
-            ephemeral: true
-          });
-        } else if (result[0] === 'error') {
-          await interaction.reply({
-            content: result[1],
-            ephemeral: true
-          });
-        }
+      if (result[0] === 'success') {
+        const userId = result[1];
+        const point = result[2];
+        const unit = result[3];
+        await interaction.reply({
+          content: `<@${userId}>は${point}${unit}を所持しています。`
+        });
+      } else if (result[0] === 'fail') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      } else if (result[0] === 'error') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
       }
     }
   },
