@@ -97,7 +97,7 @@ async function MoneyHave(dbClient, interaction, pointO, guildO, dummy) {
 
     // 贈与者と授与者の口座情報を取得
     const userResult = await dbClient.query(SELECTUSER, [guildId, userId]);
-    const userHave = userResult.rows[0]?.currency_name || 100;
+    const userHave = userResult.rows[0]?.have_money || 100;
 
     return ['success', userId, userHave, uni];
 
