@@ -115,16 +115,12 @@ async function SetCurrency(dbClient, interaction, guildO) {
     
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
-    const uni = uniResult.rows[0]?.currency_name || 'P';
-    const UPSERT = uniResult.rows.length === 0 ? `INSERT INTO servers (server_id, currency_name) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name` : 
-    `UPDATE servers SET currency_name = $2 WHERE server_id = $1 RETURNING currency_name`;
-
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(UPSERT, [guildId, new_currency]);
+      await dbClient.query(`INSERT INTO servers (server_id, currency_name) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name`, [guildId, new_currency]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
