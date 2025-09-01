@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, Locale } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, Locale } = require('discord.js');
 const { SetCurrency } = require('../functions/moneyger.js');
 
 module.exports = {
@@ -8,6 +8,7 @@ module.exports = {
     .setDescription('Manage bank')
     .setNameLocalization(Locale.Japanese, 'ago')
     .setDescriptionLocalization(Locale.Japanese, 'お金に関する設定コマンド。')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     // currency
     .addSubcommand(subcommand =>
       subcommand
