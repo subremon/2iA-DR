@@ -7,7 +7,7 @@ module.exports = {
     .setName('pt')
     .setDescription('Manage point')
     .setNameLocalization(Locale.Japanese, 'pt')
-    .setDescriptionLocalization(Locale.Japanese, 'お金に関するコマンド。')
+    .setDescriptionLocalization(Locale.Japanese, 'ポイントに関するコマンド。')
     // give
     .addSubcommand(subcommand =>
       subcommand
@@ -17,12 +17,12 @@ module.exports = {
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '誰に送るか')
+            .setDescriptionLocalization(Locale.Japanese, '送る相手')
             .setRequired(true))
         .addIntegerOption(option =>
           option.setName('point')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, 'いくら送るか')
+            .setDescriptionLocalization(Locale.Japanese, '送るポイント量')
             .setMinValue(0)
             .setMaxValue(90072)
             .setRequired(true)))
@@ -35,7 +35,7 @@ module.exports = {
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '誰のポイントを見るか')
+            .setDescriptionLocalization(Locale.Japanese, '見る相手')
             .setRequired(false))),
 
   // コマンド実行時の処理

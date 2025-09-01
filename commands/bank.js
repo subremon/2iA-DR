@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, Locale } = require('discord.js');
-const { SetCurrency } = require('../functions/moneyger.js');
+const { SetCurrency, MoneyPay } = require('../functions/moneyger.js');
 
 module.exports = {
   // スラッシュコマンドの定義
@@ -7,24 +7,46 @@ module.exports = {
     .setName('bank')
     .setDescription('Manage bank')
     .setNameLocalization(Locale.Japanese, 'bank')
-    .setDescriptionLocalization(Locale.Japanese, 'お金に関する設定コマンド。')
+    .setDescriptionLocalization(Locale.Japanese, 'ポイントの拡張コマンド。')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    // currency
+    // setting
     .addSubcommand(subcommand =>
       subcommand
         .setName('setting')
         .setDescription('.')
-        .setDescriptionLocalization(Locale.Japanese, 'ポイントの贈与をします。')
+        .setDescriptionLocalization(Locale.Japanese, 'ポイントの各種設定をします。')
         .addStringOption(option =>
-          option.setName('new_currency')
+          option.setName('currency_name')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する新しい通貨')
+            .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する通貨名')
             .setMaxLength(64)
+            .setRequired(false))
+        .addStringOption(option =>
+          option.setName('initial_points')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する初期ポイント')
+            .setMinValue(0)
+            .setMaxValue(90072)
+            .setRequired(false)))
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('pay')
+        .setDescription('.')
+        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを支払います。')
+        .addUserOption(option =>
+          option.setName('user')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, '操作する相手')
+            .setRequired(true))
+        .addIntegerOption(option =>
+          option.setName('point')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, '操作するポイント量')
+            .setMinValue(-90072)
+            .setMaxValue(90072)
             .setRequired(true))),
 
-  // コマンド実行時の処理
   async execute(interaction, dbClient) {
-    // 実行されたサブコマンドの名前を取得
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === 'setting') {
@@ -46,6 +68,28 @@ module.exports = {
           ephemeral: true
         });
       } 
+    } if (subcommand === 'pay') {
+      const result = await MoneyPay({dbClient, interaction, bank: true});
+
+      if (result[0] === 'success') {
+        const giverId = result[1];
+        const takerId = result[2];
+        const point = result[3];
+        const unit = result[4];
+        await interaction.reply({
+          content: `<@${giverId}>から<@${takerId}>に${point}${unit}送りました。`
+        });
+      } else if (result[0] === 'fail') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      } else if (result[0] === 'error') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      }
     }
   },
 };

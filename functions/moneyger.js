@@ -13,8 +13,9 @@ const errors = {
  * @param {string} dummyT - 授与者IDのオーバーライド
  * @param {boolean} unlimit - trueなら贈与者が無から資金を提供
  * @param {boolean} overlimit - trueなら贈与者が所持金がマイナスでも支払い続けられる
+ * @param {boolean} bank - trueならbankに送金
  */
-async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
+async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false, bank=false) {
   try {
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.user.id;
@@ -35,14 +36,18 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     }
 
     const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
+    const SELECTBANK = `SELECT have_money FROM servers WHERE server_id = $1 LIMIT 1`;
 
     // 贈与者と授与者の口座情報を取得
-    const giverResult = await dbClient.query(SELECTUSER, [guildId, giverId]);
+    const giverResult = bank ? await dbClient.query(SELECTBANK, [guildId]) : await dbClient.query(SELECTUSER, [guildId, giverId]);
     const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
-    const giverUPSERT = giverResult.rows.length === 0 ? 
+    const giverUPSERT = bank ? (giverResult.rows.length === 0 ?
+    `INSERT INTO servers (server_id, have_money) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
+    `UPDATE servers SET have_money = $2 WHERE server_id = $1 RETURNING have_money`)
+     : (giverResult.rows.length === 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
+    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`);
     const takerUPSERT = takerResult.rows.length === 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
@@ -55,7 +60,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
-    const takerNew = giverId != takerId ? Number(takerHave) + point : Number(giverHave);
+    const takerNew = giverId != takerId || bank ? Number(takerHave) + point : Number(giverHave);
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
@@ -110,7 +115,7 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
 async function SetCurrency(dbClient, interaction, guildO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const new_currency = interaction.options.getString("new_currency");
+    const new_currency = interaction.options.getString("currency_name");
     const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
@@ -132,7 +137,32 @@ async function SetCurrency(dbClient, interaction, guildO) {
   }
 }
 
-module.exports = { MoneyPay, MoneyHave, SetCurrency }; // ここが重要
+async function SetInitial(dbClient, interaction, guildO) {
+  try {
+    // 贈与者と授与者のIDとポイントを取得
+    const initial_points = interaction.options.getString("initial_points");
+    const guildId = guildO || interaction.guild.id;
+
+    // データベースの更新をトランザクションで実行
+    await dbClient.query('BEGIN');
+    try {
+      // 贈与者の残高を更新
+      await dbClient.query(`INSERT INTO servers (server_id, initial_points) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, initial_points]);
+      await dbClient.query('COMMIT');
+    } catch (dbError) {
+      await dbClient.query('ROLLBACK');
+      throw dbError;
+    }
+
+    return ['success', initial_points];
+
+  } catch (error) {
+    console.error('データベース操作エラー:', error);
+    return ['error', '予期せぬエラーが発生しました。'];
+  }
+}
+
+module.exports = { MoneyPay, MoneyHave, SetCurrency, SetInitial }; // ここが重要
 
   
 
