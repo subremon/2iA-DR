@@ -78,7 +78,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
   }
 }
 
-async function MoneyHave(dbClient, interaction, pointO, guildO, dummy) {
+async function MoneyHave(dbClient, interaction, guildO, dummy) {
   try {
     // 贈与者と授与者のIDとポイントを取得
     const userId = dummy || interaction.options.getUser("user")?.id || interaction.user.id;
@@ -107,7 +107,39 @@ async function MoneyHave(dbClient, interaction, pointO, guildO, dummy) {
   }
 }
 
-module.exports = { MoneyPay, MoneyHave }; // ここが重要
+async function SetCurrency(dbClient, interaction, guildO) {
+  try {
+    // 贈与者と授与者のIDとポイントを取得
+    const new_currency = interaction.options.getString("new_currency");
+    const guildId = guildO || interaction.guild.id;
+    
+    // サーバーごとの通貨名を取得
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uni = uniResult.rows[0]?.currency_name || 'P';
+    const UPSERT = uniResult.rows.length === 0 ? `INSERT INTO servers (server_id, currency_name) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name` : 
+    `UPDATE servers SET currency_name = $2 WHERE server_id = $1 RETURNING currency_name`;
+
+
+    // データベースの更新をトランザクションで実行
+    await dbClient.query('BEGIN');
+    try {
+      // 贈与者の残高を更新
+      await dbClient.query(UPSERT, [guildId, new_currency]);
+      await dbClient.query('COMMIT');
+    } catch (dbError) {
+      await dbClient.query('ROLLBACK');
+      throw dbError;
+    }
+
+    return ['success', userId, userHave, uni];
+
+  } catch (error) {
+    console.error('データベース操作エラー:', error);
+    return ['error', '予期せぬエラーが発生しました。'];
+  }
+}
+
+module.exports = { MoneyPay, MoneyHave, SetCurrency }; // ここが重要
 
   
 

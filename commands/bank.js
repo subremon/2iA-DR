@@ -4,39 +4,22 @@ const { MoneyPay, MoneyHave } = require('../functions/moneyger.js');
 module.exports = {
   // スラッシュコマンドの定義
   data: new SlashCommandBuilder()
-    .setName('money')
-    .setDescription('Manage money')
+    .setName('bank')
+    .setDescription('Manage bank')
     .setNameLocalization(Locale.Japanese, 'ago')
-    .setDescriptionLocalization(Locale.Japanese, 'お金に関するコマンド。')
-    // give
+    .setDescriptionLocalization(Locale.Japanese, 'お金に関する設定コマンド。')
+    // currency
     .addSubcommand(subcommand =>
       subcommand
-        .setName('give')
+        .setName('currency')
         .setDescription('.')
         .setDescriptionLocalization(Locale.Japanese, 'ポイントの贈与をします。')
-        .addUserOption(option =>
-          option.setName('user')
+        .addStringOption(option =>
+          option.setName('new_currency')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '誰に送るか')
-            .setRequired(true))
-        .addIntegerOption(option =>
-          option.setName('point')
-            .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, 'いくら送るか')
-            .setMinValue(0)
-            .setMaxValue(90072)
-            .setRequired(true)))
-    // have
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('have')
-        .setDescription('Have points')
-        .setDescriptionLocalization(Locale.Japanese, 'ポイントの確認をします。')
-        .addUserOption(option =>
-          option.setName('user')
-            .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '誰のポイントを見るか')
-            .setRequired(false))),
+            .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する新しい通貨')
+            .setMaxLength(20)
+            .setRequired(true))),
 
   // コマンド実行時の処理
   async execute(interaction, dbClient) {
