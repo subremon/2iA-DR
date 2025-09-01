@@ -72,10 +72,10 @@ module.exports = {
 
       if (result[0] === 'success') {
         const userId = result[1];
-        const point = result[2];
-        const unit = result[3];
+        const userResult = result[2];
+        const uni = result[3];
         await interaction.reply({
-          content: `<@${userId}>は${point}${unit}を所持しています。`
+          content: `<@${userId}>は${userResult}${uni}を所持しています。`
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({
