@@ -55,7 +55,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
-    const takerNew = giverId != takerId ? Number(takerHave) + point : Number(giverHave) + point;
+    const takerNew = giverId != takerId ? Number(takerHave) + point : Number(giverHave);
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
