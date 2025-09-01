@@ -4,9 +4,9 @@ const { MoneyPay, MoneyHave } = require('../functions/moneyger.js');
 module.exports = {
   // スラッシュコマンドの定義
   data: new SlashCommandBuilder()
-    .setName('money')
-    .setDescription('Manage money')
-    .setNameLocalization(Locale.Japanese, 'ago')
+    .setName('pt')
+    .setDescription('Manage point')
+    .setNameLocalization(Locale.Japanese, 'pt')
     .setDescriptionLocalization(Locale.Japanese, 'お金に関するコマンド。')
     // give
     .addSubcommand(subcommand =>
