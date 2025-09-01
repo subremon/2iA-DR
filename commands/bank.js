@@ -27,7 +27,7 @@ module.exports = {
     // 実行されたサブコマンドの名前を取得
     const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === 'currency') {
+    if (subcommand === 'setting') {
       const result = await SetCurrency(dbClient, interaction);
 
       if (result[0] === 'success') {
