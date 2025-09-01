@@ -112,9 +112,6 @@ async function SetCurrency(dbClient, interaction, guildO) {
     // 贈与者と授与者のIDとポイントを取得
     const new_currency = interaction.options.getString("new_currency");
     const guildId = guildO || interaction.guild.id;
-    
-    // サーバーごとの通貨名を取得
-    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');

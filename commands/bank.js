@@ -6,20 +6,20 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('bank')
     .setDescription('Manage bank')
-    .setNameLocalization(Locale.Japanese, 'ago')
+    .setNameLocalization(Locale.Japanese, 'bank')
     .setDescriptionLocalization(Locale.Japanese, 'お金に関する設定コマンド。')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     // currency
     .addSubcommand(subcommand =>
       subcommand
-        .setName('currency')
+        .setName('setting')
         .setDescription('.')
         .setDescriptionLocalization(Locale.Japanese, 'ポイントの贈与をします。')
         .addStringOption(option =>
           option.setName('new_currency')
             .setDescription('.')
             .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する新しい通貨')
-            .setMaxLength(20)
+            .setMaxLength(64)
             .setRequired(true))),
 
   // コマンド実行時の処理
