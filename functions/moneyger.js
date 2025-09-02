@@ -123,7 +123,7 @@ async function SetCurrency(dbClient, interaction, guildO) {
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points) VALUES ($1, $2 $3) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name`, [guildId, new_currency, initial_points]);
+      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points) VALUES ($1, $2, $3) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name`, [guildId, new_currency, initial_points]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
@@ -151,7 +151,7 @@ async function SetInitial(dbClient, interaction, guildO) {
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points) VALUES ($1, $2 $3) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, currency, new_initial_points]);
+      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points) VALUES ($1, $2, $3) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, currency, new_initial_points]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
