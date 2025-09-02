@@ -143,7 +143,7 @@ async function SetCurrency(dbClient, interaction, guildO) {
 async function SetInitial(dbClient, interaction, guildO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const new_initial_points = interaction.options.getInteger("initial_points");
+    const new_initial_points = interaction.options.getInteger("initial_points") || 50;
     const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
