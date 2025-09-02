@@ -28,6 +28,7 @@ module.exports = {
             .setMinValue(0)
             .setMaxValue(90072)
             .setRequired(false)))
+    // pay
     .addSubcommand(subcommand =>
       subcommand
         .setName('pay')
@@ -44,7 +45,13 @@ module.exports = {
             .setDescriptionLocalization(Locale.Japanese, '操作するポイント量')
             .setMinValue(-90072)
             .setMaxValue(90072)
-            .setRequired(true))),
+            .setRequired(true))
+    // have
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('have')
+        .setDescription('Have points')
+        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを確認します。'))),
 
   async execute(interaction, dbClient) {
     const subcommand = interaction.options.getSubcommand();
