@@ -54,7 +54,7 @@ module.exports = {
       const responses = [];
 
       // 通貨の設定
-      if (interaction.options.getString("currency_name")) {
+      if (interaction.options.get("currency_name")) {
         const result = await SetCurrency(dbClient, interaction);
         if (result[0] === 'success') {
           const new_currency = result[1];
@@ -69,7 +69,7 @@ module.exports = {
       }
 
       // 初期金の設定
-      if (interaction.options.getInteger("initial_points")) {
+      if (interaction.options.get("initial_points")) {
         const result2 = await SetInitial(dbClient, interaction);
         if (result2[0] === 'success') {
           const new_initial_points = result2[1];

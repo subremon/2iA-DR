@@ -117,8 +117,11 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
 
 async function SetCurrency(dbClient, interaction, guildO) {
   try {
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uni = uniResult.rows[0]?.currency_name || 'P';
+    
     // 贈与者と授与者のIDとポイントを取得
-    const new_currency = interaction.options.getString("currency_name");
+    const new_currency = interaction.options.getString("currency_name") || uni;
     const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
@@ -142,8 +145,11 @@ async function SetCurrency(dbClient, interaction, guildO) {
 
 async function SetInitial(dbClient, interaction, guildO) {
   try {
+    const uniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uni = uniResult.rows[0]?.currency_name || 100;
+
     // 贈与者と授与者のIDとポイントを取得
-    const new_initial_points = interaction.options.getInteger("initial_points") || 50;
+    const new_initial_points = interaction.options.getInteger("initial_points") || initial;
     const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
