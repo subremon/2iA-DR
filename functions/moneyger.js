@@ -120,7 +120,7 @@ async function SetCurrency(dbClient, interaction, guildO) {
     const guildId = guildO || interaction.guild.id;
 
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
-    const initial_points = iniResult.rows[0]?.initial_points || 'P';
+    const initial_points = iniResult.rows[0]?.initial_points || 0;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
