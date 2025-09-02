@@ -27,7 +27,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const uni = uniResult.rows[0]?.currency_name || 'P';
     
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
-    const ini = iniResult.rows[0]?.initial_points || 100;
+    const ini = iniResult.rows[0]?.initial_points || 0;
 
     // ユーザーIDが存在しない場合はエラー
     if (!takerId) {
@@ -86,6 +86,9 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
     // 贈与者と授与者のIDとポイントを取得
     const userId = dummy || interaction.options.getUser("user")?.id || interaction.user.id;
     const guildId = guildO || interaction.guild.id;
+
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const ini = iniResult.rows[0]?.initial_points || 0;
     
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
@@ -100,7 +103,7 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
 
     // 贈与者と授与者の口座情報を取得
     const userResult = await dbClient.query(SELECTUSER, [guildId, userId]);
-    const userHave = userResult.rows[0]?.have_money || 100;
+    const userHave = userResult.rows[0]?.have_money || ini;
 
     return ['success', userId, userHave, uni];
 
