@@ -47,48 +47,53 @@ module.exports = {
             .setRequired(true))),
 
   async execute(interaction, dbClient) {
-    const subcommand = interaction.options.getSubcommand();
-
     if (subcommand === 'setting') {
-      let a = "";
-      let b = "";
+      // レスポンスメッセージを格納する配列
+      const responses = [];
 
+      // 通貨の設定
       if (interaction.options.getInteger("set_currency")) {
         const result = await SetCurrency(dbClient, interaction);
         if (result[0] === 'success') {
           const new_currency = result[1];
-          a = `通貨の名前を${new_currency}に変更しました。`;
-        } else if (result[0] === 'fail') {
+          responses.push(`通貨の名前を${new_currency}に変更しました。`);
+        } else { // 'fail' と 'error' をまとめて処理
           await interaction.reply({
             content: result[1],
             ephemeral: true
           });
-        } else if (result[0] === 'error') {
-          await interaction.reply({
-            content: result[1],
-            ephemeral: true
-          });
-        } 
+          return; // エラーが発生したらここで処理を終了
+        }
       }
+
+      // 初期金の設定
       if (interaction.options.getInteger("initial_points")) {
         const result2 = await SetInitial(dbClient, interaction);
         if (result2[0] === 'success') {
-          const new_currency = result2[1];
-          b = `初期金を${new_currency}に変更しました。`;
-        } else if (result2[0] === 'fail') {
+          const new_initial_points = result2[1];
+          responses.push(`初期金を${new_initial_points}に変更しました。`);
+        } else { // 'fail' と 'error' をまとめて処理
           await interaction.reply({
-            content: result[1],
+            content: result2[1],
             ephemeral: true
           });
-        } else if (result2[0] === 'error') {
-          await interaction.reply({
-            content: result[1],
-            ephemeral: true
-          });
-        } 
+          return; // エラーが発生したらここで処理を終了
+        }
       }
 
-      await interaction.reply({ content: `${a}\n${b}` });
+      // レスポンス配列が空でない場合のみ、メッセージを送信
+      if (responses.length > 0) {
+        await interaction.reply({
+          content: responses.join('\n'), // 配列を改行で結合して表示
+          ephemeral: true // エラーメッセージ以外は一時的なメッセージとするのが一般的
+        });
+      } else {
+        // どちらのオプションも指定されなかった場合
+        await interaction.reply({
+          content: '設定する項目を選択してください。',
+          ephemeral: true
+        });
+      }
     } if (subcommand === 'pay') {
       const result = await MoneyPay({dbClient, interaction, bank: true});
 
