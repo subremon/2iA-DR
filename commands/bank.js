@@ -21,7 +21,7 @@ module.exports = {
             .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する通貨名')
             .setMaxLength(64)
             .setRequired(false))
-        .addStringOption(option =>
+        .addIntegerOption(option =>
           option.setName('initial_points')
             .setDescription('.')
             .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する初期ポイント')
