@@ -97,7 +97,7 @@ module.exports = {
         });
       }
     } if (subcommand === 'pay') {
-      const result = await MoneyPay({dbClient, interaction, bank: true});
+      const result = await MoneyPay({dbClient, interaction, dummyG: 'bank', overlimit: true});
 
       if (result[0] === 'success') {
         const giverId = result[1];

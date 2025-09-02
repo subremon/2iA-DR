@@ -13,9 +13,8 @@ const errors = {
  * @param {string} dummyT - 授与者IDのオーバーライド
  * @param {boolean} unlimit - trueなら贈与者が無から資金を提供
  * @param {boolean} overlimit - trueなら贈与者が所持金がマイナスでも支払い続けられる
- * @param {boolean} bank - trueならbankに送金
  */
-async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false, bank=false) {
+async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
   try {
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.user.id;
@@ -39,18 +38,14 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     }
 
     const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
-    const SELECTBANK = `SELECT have_money FROM servers WHERE server_id = $1 LIMIT 1`;
 
     // 贈与者と授与者の口座情報を取得
     const giverResult = bank ? await dbClient.query(SELECTBANK, [guildId]) : await dbClient.query(SELECTUSER, [guildId, giverId]);
     const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
-    const giverUPSERT = bank ? (giverResult.rows.length === 0 ?
-    `INSERT INTO servers (server_id, have_money) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE servers SET have_money = $2 WHERE server_id = $1 RETURNING have_money`)
-     : (giverResult.rows.length === 0 ? 
+    const giverUPSERT = giverResult.rows.length === 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`);
+    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
     const takerUPSERT = takerResult.rows.length === 0 ? 
     `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
@@ -63,7 +58,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     if (giverNew < 0 && !overlimit) {
       return ['fail', `所持金が${Math.abs(giverNew)}${uni}不足しています。`];
     }
-    const takerNew = giverId != takerId || bank ? Number(takerHave) + point : Number(giverHave);
+    const takerNew = giverId != takerId ? Number(takerHave) + point : Number(giverHave);
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
@@ -117,12 +112,13 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
 
 async function SetCurrency(dbClient, interaction, guildO) {
   try {
+    const guildId = guildO || interaction.guild.id;
+
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
     const initial_points = iniResult.rows[0]?.initial_points || 'P';
     
     // 贈与者と授与者のIDとポイントを取得
     const new_currency = interaction.options.getString("currency_name");
-    const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
@@ -145,12 +141,13 @@ async function SetCurrency(dbClient, interaction, guildO) {
 
 async function SetInitial(dbClient, interaction, guildO) {
   try {
+    const guildId = guildO || interaction.guild.id;
+
     const curResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
     const currency = curResult.rows[0]?.currency_name || 'P';
 
     // 贈与者と授与者のIDとポイントを取得
     const new_initial_points = interaction.options.getInteger("initial_points");
-    const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
