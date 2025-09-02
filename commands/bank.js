@@ -54,7 +54,7 @@ module.exports = {
       const responses = [];
 
       // 通貨の設定
-      if (interaction.options.getInteger("currency_name")) {
+      if (interaction.options.getString("currency_name")) {
         const result = await SetCurrency(dbClient, interaction);
         if (result[0] === 'success') {
           const new_currency = result[1];
