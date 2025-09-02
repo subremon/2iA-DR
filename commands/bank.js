@@ -47,6 +47,8 @@ module.exports = {
             .setRequired(true))),
 
   async execute(interaction, dbClient) {
+    const subcommand = interaction.options.getSubcommand();
+    
     if (subcommand === 'setting') {
       // レスポンスメッセージを格納する配列
       const responses = [];
