@@ -118,6 +118,27 @@ module.exports = {
           ephemeral: true
         });
       }
+    } else if (subcommand === 'have') {
+      const result = await MoneyHave(dbClient, interaction, null, null, 'bank', null, true);
+
+      if (result[0] === 'success') {
+        const userId = result[1];
+        const userHave = result[2];
+        const uni = result[3];
+        await interaction.reply({
+          content: `<@${userId}>は${userHave}${uni}を所持しています。`
+        });
+      } else if (result[0] === 'fail') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      } else if (result[0] === 'error') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      }
     }
   },
 };
