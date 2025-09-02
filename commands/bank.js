@@ -73,7 +73,7 @@ module.exports = {
       if (interaction.options.getInteger("initial_points")) {
         const result2 = await SetInitial(dbClient, interaction);
         if (result2[0] === 'success') {
-          const new_currency = result[1];
+          const new_currency = result2[1];
           b = `初期金を${new_currency}に変更しました。`;
         } else if (result2[0] === 'fail') {
           await interaction.reply({
