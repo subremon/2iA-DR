@@ -125,7 +125,7 @@ async function SetCurrency(dbClient, interaction, guildO) {
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, currency_name) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name`, [guildId, new_currency]);
+      await dbClient.query(`INSERT INTO servers (server_id, initial_points) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, new_currency]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
@@ -143,22 +143,21 @@ async function SetCurrency(dbClient, interaction, guildO) {
 async function SetInitial(dbClient, interaction, guildO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const initial_points = interaction.options.getInteger("initial_points");
-    console.log(initial_points);
+    const new_initial_points = interaction.options.getInteger("initial_points");
     const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, initial_points) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, initial_points]);
+      await dbClient.query(`INSERT INTO servers (server_id, initial_points) VALUES ($1, $2) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, new_initial_points]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
       throw dbError;
     }
 
-    return ['success', initial_points];
+    return ['success', new_initial_points];
 
   } catch (error) {
     console.error('データベース操作エラー:', error);
