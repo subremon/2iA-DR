@@ -18,7 +18,7 @@ module.exports = {
         .addStringOption(option =>
           option.setName('currency_name')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する通貨名')
+            .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する通貨の名前')
             .setMaxLength(64)
             .setRequired(false))
         .addIntegerOption(option =>
@@ -54,7 +54,7 @@ module.exports = {
       const responses = [];
 
       // 通貨の設定
-      if (interaction.options.getInteger("set_currency")) {
+      if (interaction.options.getInteger("currency_name")) {
         const result = await SetCurrency(dbClient, interaction);
         if (result[0] === 'success') {
           const new_currency = result[1];
@@ -73,7 +73,7 @@ module.exports = {
         const result2 = await SetInitial(dbClient, interaction);
         if (result2[0] === 'success') {
           const new_initial_points = result2[1];
-          responses.push(`初期金を${new_initial_points}に変更しました。`);
+          responses.push(`初期ポイントを${new_initial_points}に変更しました。`);
         } else { // 'fail' と 'error' をまとめて処理
           await interaction.reply({
             content: result2[1],

@@ -144,6 +144,7 @@ async function SetInitial(dbClient, interaction, guildO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
     const initial_points = interaction.options.getInteger("initial_points");
+    console.log(initial_points);
     const guildId = guildO || interaction.guild.id;
 
     // データベースの更新をトランザクションで実行
