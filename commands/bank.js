@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, Locale } = require('discord.js');
-const { SetCurrency, MoneyPay } = require('../functions/moneyger.js');
+const { MoneyPay, SetCurrency, SetInitial } = require('../functions/moneyger.js');
 
 module.exports = {
   // スラッシュコマンドの定義
@@ -51,12 +51,13 @@ module.exports = {
 
     if (subcommand === 'setting') {
       const result = await SetCurrency(dbClient, interaction);
+      const result2 = await SetInitial(dbClient, interaction);
+      let a = "";
+      let b = "";
 
       if (result[0] === 'success') {
         const new_currency = result[1];
-        await interaction.reply({
-          content: `通貨の名前を${new_currency}に変更しました。`
-        });
+        a = `通貨の名前を${new_currency}に変更しました。`;
       } else if (result[0] === 'fail') {
         await interaction.reply({
           content: result[1],
@@ -68,6 +69,22 @@ module.exports = {
           ephemeral: true
         });
       } 
+      if (result2[0] === 'success') {
+        const new_currency = result[1];
+        b = `初期金を${new_currency}に変更しました。`;
+      } else if (result2[0] === 'fail') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      } else if (result2[0] === 'error') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      } 
+      
+      await interaction.reply({ content: `${a}\n${b}` });
     } if (subcommand === 'pay') {
       const result = await MoneyPay({dbClient, interaction, bank: true});
 

@@ -26,6 +26,9 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
+    
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const ini = iniResult.rows[0]?.initial_points || 100;
 
     // ユーザーIDが存在しない場合はエラー
     if (!takerId) {
@@ -53,8 +56,8 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
     // 新しい所持金を計算
-    const giverHave = giverResult.rows[0]?.have_money || 100;
-    const takerHave = takerResult.rows[0]?.have_money || 100;
+    const giverHave = giverResult.rows[0]?.have_money || ini;
+    const takerHave = takerResult.rows[0]?.have_money || ini;
 
     const giverNew = unlimit ? giverHave : Number(giverHave) - point;
     if (giverNew < 0 && !overlimit) {
