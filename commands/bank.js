@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, Locale } = require('discord.js');
-const { MoneyPay, SetCurrency, SetInitial } = require('../functions/moneyger.js');
+const { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial } = require('../functions/moneyger.js');
 
 module.exports = {
   // スラッシュコマンドの定義

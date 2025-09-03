@@ -196,7 +196,7 @@ async function SetInitial(dbClient, interaction, guildO) {
   }
 }
 
-module.exports = { MoneyPay, MoneyHave, SetCurrency, SetInitial }; // ここが重要
+module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial }; // ここが重要
 
   
 
