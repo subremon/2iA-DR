@@ -196,7 +196,75 @@ async function SetInitial(dbClient, interaction, guildO) {
   }
 }
 
-module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial }; // ここが重要
+async function SetLogChannel(dbClient, interaction, channelO) {
+  try {
+    // 贈与者と授与者のIDとポイントを取得
+    const curResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const currency = curResult.rows[0]?.currency_name || 'P';
+    
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const initial_points = iniResult.rows[0]?.initial_points || 0;
+
+    const guildId = interaction.guild.id;
+    const log_channel = channelO || interaction.options.getString("log_channel_locate");
+
+
+    // データベースの更新をトランザクションで実行
+    await dbClient.query('BEGIN');
+    try {
+      // 贈与者の残高を更新
+      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points, log_channel_name) VALUES ($1, $2, $3, $4) ON CONFLICT (server_id) DO UPDATE SET log_channel_name = EXCLUDED.log_channel_name RETURNING log_channel_name`, [guildId, currency, initial_points, log_channel]);
+      await dbClient.query('COMMIT');
+    } catch (dbError) {
+      await dbClient.query('ROLLBACK');
+      throw dbError;
+    }
+
+    return ['success', log_channel];
+
+  } catch (error) {
+    console.error('データベース操作エラー:', error);
+    return ['error', '予期せぬエラーが発生しました。'];
+  }
+}
+
+async function LogModule(interaction, msg) {
+  if (!interaction.isChatInputCommand()) return [interaction.commandName, interaction.options.getSubcommand(false)];
+
+  // オプション情報を整形
+  const optionsString = interaction.options.data
+    .map(option => {
+      // オプション名と値を結合
+      if (option.value) {
+        return `${option.name}:${option.value}`;
+      }
+      return option.name; // 値がない場合（サブコマンドなど）
+    })
+    .join(" ");
+
+  // サブコマンドを取得 (もしあれば)
+  const subcommand = interaction.options.getSubcommand(false) || '';
+
+  // チャンネル名を取得
+  const channelId = interaction.channel?.id || '000000000000000000';
+
+  // 最終的なログメッセージを生成
+  const logMessage = `
+    application command ran: /${interaction.commandName} ${subcommand} ${optionsString}
+    in: <#${channelId}>
+  `.trim(); // 余分な空白を削除
+
+  const logResult = await dbClient.query(`SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+  const log_channel = logResult.rows[0]?.log_channel_id;
+
+  if (!log_channel.length === 0) {
+    interaction.guild.channels.cache.get(log_channel).send(logMessage);
+  }
+
+  return [interaction.commandName, subcommand, channelId];
+}
+
+module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLogChannel, LogModule }; // ここが重要
 
   
 

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, Locale } = require('discord.js');
-const { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial } = require('../functions/moneyger.js');
+const { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLogChannel, LogModule } = require('../functions/moneyger.js');
 
 module.exports = {
   // スラッシュコマンドの定義
@@ -27,7 +27,14 @@ module.exports = {
             .setDescriptionLocalization(Locale.Japanese, 'このサーバーで使用する初期ポイント')
             .setMinValue(0)
             .setMaxValue(90072)
-            .setRequired(false)))
+            .setRequired(false))
+        .addStringOption(option =>
+          option.setName('log_channel_locate')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, 'このサーバーの取引ログを残すチャンネル')
+            .setMinValue(-90072)
+            .setMaxValue(90072)
+            .setRequired(true)))
     // pay
     .addSubcommand(subcommand =>
       subcommand
@@ -72,7 +79,7 @@ module.exports = {
             .setRequired(true))),
 
   async execute(interaction, dbClient) {
-    const subcommand = interaction.options.getSubcommand();
+    const subcommand = LogModule(interaction)[1];
     
     if (subcommand === 'setting') {
       // レスポンスメッセージを格納する配列
@@ -99,6 +106,21 @@ module.exports = {
         if (result2[0] === 'success') {
           const new_initial_points = result2[1];
           responses.push(`初期ポイントを${new_initial_points}に変更しました。`);
+        } else { // 'fail' と 'error' をまとめて処理
+          await interaction.reply({
+            content: result2[1],
+            ephemeral: true
+          });
+          return; // エラーが発生したらここで処理を終了
+        }
+      }
+
+      // 初期金の設定
+      if (interaction.options.get("log_channel_locate")) {
+        const result2 = await SetInitial(dbClient, interaction);
+        if (result2[0] === 'success') {
+          const log_channel = result2[1];
+          responses.push(`ログの出力を${log_channel}に行います。`);
         } else { // 'fail' と 'error' をまとめて処理
           await interaction.reply({
             content: result2[1],

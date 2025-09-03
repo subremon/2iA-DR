@@ -46,7 +46,7 @@ module.exports = {
     if (subcommand === 'give') {
       // payサブコマンドが実行された場合の処理
       // MoneyPay関数を呼び出し、結果を待つ
-      const result = await MoneyPay(dbClient, interaction);
+      const subcommand = LogModule(interaction)[1];
 
       // 応答の処理（以前の回答と同じ）
       if (result[0] === 'success') {
@@ -76,7 +76,8 @@ module.exports = {
         const userHave = result[2];
         const uni = result[3];
         await interaction.reply({
-          content: `<@${userId}>は${userHave}${uni}を所持しています。`
+          content: `<@${userId}>は${userHave}${uni}を所持しています。`,
+          ephemeral: true
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({
