@@ -33,9 +33,6 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     if (!takerId) {
       return ['error', errors.missingUser];
     }
-    if (point <= 0) {
-      return ['fail', 'ポイントは0より大きい値を指定してください。'];
-    }
 
     const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
 

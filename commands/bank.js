@@ -55,7 +55,7 @@ module.exports = {
     // set
     .addSubcommand(subcommand =>
       subcommand
-        .setName('set')
+        .setName('edit')
         .setDescription('.')
         .setDescriptionLocalization(Locale.Japanese, 'ユーザーのポイントを設定します。')
         .addUserOption(option =>
@@ -164,7 +164,7 @@ module.exports = {
           ephemeral: true
         });
       }
-    }　if (subcommand === 'set') {
+    }　if (subcommand === 'edit') {
       const result = await MoneyPay(dbClient, interaction, null, null, 'bank', null, true);
 
       if (result[0] === 'success') {
