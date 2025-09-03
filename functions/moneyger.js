@@ -110,10 +110,10 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
   }
 }
 
-async function SetMoney(dbClient, interaction, guildO) {
+async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const userId = dummyT || interaction.options.getUser("user")?.id;
+    const userId = dummy || interaction.options.getUser("user")?.id;
     const point = pointO || interaction.options.getInteger("point");
     const guildId = guildO || interaction.guild.id;
 
