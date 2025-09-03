@@ -165,7 +165,7 @@ module.exports = {
         });
       }
     }　if (subcommand === 'edit') {
-      const result = await SetMoney(dbClient, interaction, null, null, 'bank', null, true);
+      const result = await SetMoney(dbClient, interaction);
 
       if (result[0] === 'success') {
         const userId = result[1];
