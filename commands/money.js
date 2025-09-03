@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, Locale } = require('discord.js');
-const { MoneyPay, MoneyHave } = require('../functions/moneyger.js');
+const { MoneyPay, MoneyHave, LogModule } = require('../functions/moneyger.js');
 
 module.exports = {
   // スラッシュコマンドの定義
@@ -41,12 +41,12 @@ module.exports = {
   // コマンド実行時の処理
   async execute(interaction, dbClient) {
     // 実行されたサブコマンドの名前を取得
-    const subcommand = interaction.options.getSubcommand();
+    const subcommand = LogModule(interaction)[1];
 
     if (subcommand === 'give') {
       // payサブコマンドが実行された場合の処理
       // MoneyPay関数を呼び出し、結果を待つ
-      const subcommand = LogModule(interaction)[1];
+      const result = await MoneyPay(dbClient, interaction);
 
       // 応答の処理（以前の回答と同じ）
       if (result[0] === 'success') {
