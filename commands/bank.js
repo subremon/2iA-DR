@@ -45,7 +45,7 @@ module.exports = {
             .setDescriptionLocalization(Locale.Japanese, '操作するポイント量')
             .setMinValue(-90072)
             .setMaxValue(90072)
-            .setRequired(true))
+            .setRequired(true)))
     // have
     .addSubcommand(subcommand =>
       subcommand
@@ -69,7 +69,7 @@ module.exports = {
             .setDescriptionLocalization(Locale.Japanese, '設定するポイント量')
             .setMinValue(-90072)
             .setMaxValue(90072)
-            .setRequired(true)))),
+            .setRequired(true))),
 
   async execute(interaction, dbClient) {
     const subcommand = interaction.options.getSubcommand();
