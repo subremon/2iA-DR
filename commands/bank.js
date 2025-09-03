@@ -33,7 +33,7 @@ module.exports = {
       subcommand
         .setName('pay')
         .setDescription('.')
-        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを支払います。')
+        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを操作します。')
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
@@ -51,7 +51,25 @@ module.exports = {
       subcommand
         .setName('have')
         .setDescription('Have points')
-        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを確認します。'))),
+        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを確認します。'))
+    // set
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('set')
+        .setDescription('.')
+        .setDescriptionLocalization(Locale.Japanese, 'ユーザーのポイントを設定します。')
+        .addUserOption(option =>
+          option.setName('user')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, '設定する相手')
+            .setRequired(true))
+        .addIntegerOption(option =>
+          option.setName('point')
+            .setDescription('.')
+            .setDescriptionLocalization(Locale.Japanese, '設定するポイント量')
+            .setMinValue(-90072)
+            .setMaxValue(90072)
+            .setRequired(true)))),
 
   async execute(interaction, dbClient) {
     const subcommand = interaction.options.getSubcommand();
@@ -126,7 +144,7 @@ module.exports = {
         });
       }
     } else if (subcommand === 'have') {
-      const result = await MoneyHave(dbClient, interaction, null, null, 'bank', null, true);
+      const result = await MoneyHave(dbClient, interaction, null, 'bank');
 
       if (result[0] === 'success') {
         const userId = result[1];
@@ -134,6 +152,28 @@ module.exports = {
         const uni = result[3];
         await interaction.reply({
           content: `<@${userId}>は${userHave}${uni}を所持しています。`
+        });
+      } else if (result[0] === 'fail') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      } else if (result[0] === 'error') {
+        await interaction.reply({
+          content: result[1],
+          ephemeral: true
+        });
+      }
+    }　if (subcommand === 'set') {
+      const result = await MoneyPay(dbClient, interaction, null, null, 'bank', null, true);
+
+      if (result[0] === 'success') {
+        const userId = result[1];
+        const point = result[2];
+        const unit = result[3];
+        await interaction.reply({
+          content: `<@${userId}>のポイントを${point}${unit}に設定しました。`,
+          ephemeral: true
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({
