@@ -28,19 +28,17 @@ module.exports = {
             .setMinValue(0)
             .setMaxValue(90072)
             .setRequired(false))
-        .addStringOption(option =>
+        .addChannelOption(option =>
           option.setName('log_channel_locate')
             .setDescription('.')
             .setDescriptionLocalization(Locale.Japanese, 'このサーバーの取引ログを残すチャンネル')
-            .setMinValue(-90072)
-            .setMaxValue(90072)
             .setRequired(true)))
     // pay
     .addSubcommand(subcommand =>
       subcommand
-        .setName('pay')
+        .setName('fluctuate')
         .setDescription('.')
-        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを操作します。')
+        .setDescriptionLocalization(Locale.Japanese, 'ポイントの収支を操作します。')
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
@@ -56,15 +54,15 @@ module.exports = {
     // have
     .addSubcommand(subcommand =>
       subcommand
-        .setName('have')
+        .setName('budget')
         .setDescription('Have points')
-        .setDescriptionLocalization(Locale.Japanese, 'サーバーのポイントを確認します。'))
+        .setDescriptionLocalization(Locale.Japanese, 'サーバー自体のポイントを確認します。'))
     // set
     .addSubcommand(subcommand =>
       subcommand
-        .setName('edit')
+        .setName('replace')
         .setDescription('.')
-        .setDescriptionLocalization(Locale.Japanese, 'ユーザーのポイントを設定します。')
+        .setDescriptionLocalization(Locale.Japanese, 'ユーザーのポイントを置き替えます。')
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
@@ -143,16 +141,16 @@ module.exports = {
           ephemeral: true
         });
       }
-    } if (subcommand === 'pay') {
+    } if (subcommand === 'fluctuate') {
       const result = await MoneyPay(dbClient, interaction, null, null, 'bank', null, true);
 
       if (result[0] === 'success') {
-        const giverId = result[1];
         const takerId = result[2];
         const point = result[3];
         const unit = result[4];
+        const content = point > 0 ? `${interaction.guild.name}から<@${takerId}>に${point}${unit}送りました。` : `${interaction.guild.name}が<@${takerId}>から${-point}${unit}を徴収しました。`;
         await interaction.reply({
-          content: `<@${giverId}>から<@${takerId}>に${point}${unit}送りました。`
+          content
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({
@@ -165,15 +163,14 @@ module.exports = {
           ephemeral: true
         });
       }
-    } else if (subcommand === 'have') {
+    } else if (subcommand === 'budget') {
       const result = await MoneyHave(dbClient, interaction, null, 'bank');
 
       if (result[0] === 'success') {
-        const userId = result[1];
         const userHave = result[2];
         const uni = result[3];
         await interaction.reply({
-          content: `<@${userId}>は${userHave}${uni}を所持しています。`
+          content: `${interaction.guild.name}は${userHave}${uni}を所持しています。`
         });
       } else if (result[0] === 'fail') {
         await interaction.reply({
@@ -186,7 +183,7 @@ module.exports = {
           ephemeral: true
         });
       }
-    }　if (subcommand === 'edit') {
+    }　if (subcommand === 'replace') {
       const result = await SetMoney(dbClient, interaction);
 
       if (result[0] === 'success') {

@@ -206,7 +206,7 @@ async function SetLogChannel(dbClient, interaction, channelO) {
     const initial_points = iniResult.rows[0]?.initial_points || 0;
 
     const guildId = interaction.guild.id;
-    const log_channel = channelO || interaction.options.getString("log_channel_locate");
+    const log_channel = channelO || interaction.options.getChannel("log_channel_locate")?.id;
 
 
     // データベースの更新をトランザクションで実行
