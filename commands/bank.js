@@ -77,7 +77,7 @@ module.exports = {
             .setRequired(true))),
 
   async execute(interaction, dbClient) {
-    const subcommand = LogModule(interaction)[1];
+    const subcommand = LogModule(dbClient, interaction)[1];
     
     if (subcommand === 'setting') {
       // レスポンスメッセージを格納する配列

@@ -228,7 +228,7 @@ async function SetLogChannel(dbClient, interaction, channelO) {
   }
 }
 
-async function LogModule(interaction, msg) {
+async function LogModule(dbClient, interaction) {
   if (!interaction.isChatInputCommand()) return [interaction.commandName, interaction.options.getSubcommand(false)];
 
   // オプション情報を整形
