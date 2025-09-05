@@ -32,7 +32,7 @@ module.exports = {
           option.setName('log_channel_locate')
             .setDescription('.')
             .setDescriptionLocalization(Locale.Japanese, 'このサーバーの取引ログを残すチャンネル')
-            .setRequired(true)))
+            .setRequired(false)))
     // pay
     .addSubcommand(subcommand =>
       subcommand
