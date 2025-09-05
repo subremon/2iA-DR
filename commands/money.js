@@ -13,11 +13,11 @@ module.exports = {
       subcommand
         .setName('give')
         .setDescription('.')
-        .setDescriptionLocalization(Locale.Japanese, 'ポイントの贈与をします。')
+        .setDescriptionLocalization(Locale.Japanese, 'ポイントを他ユーザーに送ります。')
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '送る相手')
+            .setDescriptionLocalization(Locale.Japanese, 'ポイントを送る相手')
             .setRequired(true))
         .addIntegerOption(option =>
           option.setName('point')
@@ -31,7 +31,7 @@ module.exports = {
       subcommand
         .setName('have')
         .setDescription('Have points')
-        .setDescriptionLocalization(Locale.Japanese, 'ポイントの確認をします。')
+        .setDescriptionLocalization(Locale.Japanese, '所持ポイントを確認します。')
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
