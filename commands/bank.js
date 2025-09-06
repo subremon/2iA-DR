@@ -38,16 +38,16 @@ module.exports = {
       subcommand
         .setName('fluctuate')
         .setDescription('.')
-        .setDescriptionLocalization(Locale.Japanese, 'ポイントの収支を操作します。')
+        .setDescriptionLocalization(Locale.Japanese, 'ポイントを増減します。')
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '操作する相手')
+            .setDescriptionLocalization(Locale.Japanese, '操作するユーザー')
             .setRequired(true))
         .addIntegerOption(option =>
           option.setName('point')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '操作するポイント量')
+            .setDescriptionLocalization(Locale.Japanese, '操作するポイントの量')
             .setMinValue(-90072)
             .setMaxValue(90072)
             .setRequired(true)))
@@ -56,7 +56,7 @@ module.exports = {
       subcommand
         .setName('budget')
         .setDescription('Have points')
-        .setDescriptionLocalization(Locale.Japanese, 'サーバー自体のポイントを確認します。'))
+        .setDescriptionLocalization(Locale.Japanese, 'サーバーの所持ポイントを確認します。'))
     // set
     .addSubcommand(subcommand =>
       subcommand
@@ -66,12 +66,12 @@ module.exports = {
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '設定する相手')
+            .setDescriptionLocalization(Locale.Japanese, '置き換えるユーザー')
             .setRequired(true))
         .addIntegerOption(option =>
           option.setName('point')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '設定するポイント量')
+            .setDescriptionLocalization(Locale.Japanese, '置き換えるポイントの量')
             .setMinValue(-90072)
             .setMaxValue(90072)
             .setRequired(true))),

@@ -22,7 +22,7 @@ module.exports = {
         .addIntegerOption(option =>
           option.setName('point')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '送るポイント量')
+            .setDescriptionLocalization(Locale.Japanese, '送るポイントの量')
             .setMinValue(0)
             .setMaxValue(90072)
             .setRequired(true)))
@@ -35,7 +35,7 @@ module.exports = {
         .addUserOption(option =>
           option.setName('user')
             .setDescription('.')
-            .setDescriptionLocalization(Locale.Japanese, '見る相手')
+            .setDescriptionLocalization(Locale.Japanese, '確認するユーザー')
             .setRequired(false))),
 
   // コマンド実行時の処理
