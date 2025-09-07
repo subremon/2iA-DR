@@ -261,6 +261,7 @@ async function LogModule(dbClient, interaction) {
     interaction.guild.channels.cache.get(log_channel).send(logMessage);
   }
 
+  console.log("complete!")
   return [interaction.commandName, subcommand, channelId];
 }
 
