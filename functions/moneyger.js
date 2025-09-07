@@ -229,36 +229,30 @@ async function SetLogChannel(dbClient, interaction, channelO) {
 }
 
 async function LogModule(dbClient, interaction) {
-  if (!interaction.isChatInputCommand()) return [interaction.commandName, interaction.options.getSubcommand(false)];
+  if (!interaction.isChatInputCommand()) return;
 
-  // オプション情報を整形
   const optionsString = interaction.options.data
-    .map(option => {
-      // オプション名と値を結合
-      if (option.value) {
-        return `${option.name}:${option.value}`;
-      }
-      return option.name; // 値がない場合（サブコマンドなど）
-    })
+    .map(option => option.value !== undefined 
+      ? `${option.name}:${option.value}` 
+      : option.name)
     .join(" ");
 
-  // サブコマンドを取得 (もしあれば)
-  const subcommand = interaction.options.getSubcommand(false) || '';
+  const subcommand = interaction.options.getSubcommand(false) || "";
+  const channelId = interaction.channel?.id || "000000000000000000";
 
-  // チャンネル名を取得
-  const channelId = interaction.channel?.id || '000000000000000000';
+  const logMessage = 
+    `application command ran: /${interaction.commandName} ${subcommand} ${optionsString}\n` +
+    `in: <#${channelId}>`;
 
-  // 最終的なログメッセージを生成
-  const logMessage = `
-    application command ran: /${interaction.commandName} ${subcommand} ${optionsString}
-    in: <#${channelId}>
-  `.trim(); // 余分な空白を削除
+  const logResult = await dbClient.query(
+    `SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`,
+    [interaction.guild.id]
+  );
 
-  const logResult = await dbClient.query(`SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`, [interaction.guild.id]);
   const log_channel = logResult.rows[0]?.log_channel_id;
-
-  if (!log_channel.rows.length === 0) {
-    interaction.guild.channels.cache.get(log_channel).send(logMessage);
+  if (log_channel) {
+    const channel = interaction.guild.channels.cache.get(log_channel);
+    await channel?.send(logMessage);
   }
 
   return [interaction.commandName, subcommand, channelId];
