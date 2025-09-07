@@ -78,6 +78,7 @@ module.exports = {
 
   async execute(interaction, dbClient) {
     const subcommand = LogModule(dbClient, interaction)[1];
+    console.log(subcommand);
     
     if (subcommand === 'setting') {
       // レスポンスメッセージを格納する配列
