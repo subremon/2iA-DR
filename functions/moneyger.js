@@ -257,7 +257,7 @@ async function LogModule(dbClient, interaction) {
   const logResult = await dbClient.query(`SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`, [interaction.guild.id]);
   const log_channel = logResult.rows[0]?.log_channel_id;
 
-  if (!log_channel.length === 0) {
+  if (!log_channel.rows.length === 0) {
     interaction.guild.channels.cache.get(log_channel).send(logMessage);
   }
 
