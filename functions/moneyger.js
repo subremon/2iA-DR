@@ -243,7 +243,7 @@ async function LogModule(dbClient, interaction) {
     .join(" ");
 
   // サブコマンドを取得 (もしあれば)
-  const subcommand = interaction.options.getSubcommand(false) || '';
+  const subcommand = interaction.options.getSubcommand() || '';
 
   // チャンネル名を取得
   const channelId = interaction.channel?.id || '000000000000000000';
