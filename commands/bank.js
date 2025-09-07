@@ -77,7 +77,7 @@ module.exports = {
             .setRequired(true))),
 
   async execute(interaction, dbClient) {
-    const subcommand = LogModule(dbClient, interaction)[1];
+    const subcommand = await LogModule(dbClient, interaction)[1];
     console.log("2: "+ subcommand);
     
     if (subcommand === 'setting') {
