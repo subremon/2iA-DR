@@ -254,7 +254,7 @@ async function LogModule(dbClient, interaction) {
     in: <#${channelId}>
   `.trim(); // 余分な空白を削除
 
-  const logResult = await dbClient.query(`SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+  const logResult = await dbClient.query(`SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`, [interaction.guild.id]);
   const log_channel = logResult.rows[0]?.log_channel_id;
 
   if (!log_channel.length === 0) {
