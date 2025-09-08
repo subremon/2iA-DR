@@ -41,8 +41,7 @@ module.exports = {
   // コマンド実行時の処理
   async execute(interaction, dbClient) {
     // 実行されたサブコマンドの名前を取得
-    const subcommand = await LogModule(dbClient, interaction)[1];
-       console.log("e: "+subcommand);
+    const subcommand = await LogModule(dbClient, interaction);
 
     if (subcommand === 'give') {
       // payサブコマンドが実行された場合の処理

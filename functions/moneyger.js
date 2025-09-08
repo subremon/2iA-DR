@@ -261,8 +261,7 @@ async function LogModule(dbClient, interaction) {
     interaction.guild.channels.cache.get(log_channel).send(logMessage);
   }
 
-  console.log(subcommand);
-  return [interaction.commandName, subcommand, channelId];
+  return subcommand;
 }
 
 module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLogChannel, LogModule }; // ここが重要
