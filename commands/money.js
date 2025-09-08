@@ -42,12 +42,12 @@ module.exports = {
   async execute(interaction, dbClient) {
     // 実行されたサブコマンドの名前を取得
     const subcommand = await LogModule(dbClient, interaction)[1];
+       console.log("e: "+subcommand);
 
     if (subcommand === 'give') {
       // payサブコマンドが実行された場合の処理
       // MoneyPay関数を呼び出し、結果を待つ
       const result = await MoneyPay(dbClient, interaction);
-       console.log("e: "+subcommand);
 
       // 応答の処理（以前の回答と同じ）
       if (result[0] === 'success') {
