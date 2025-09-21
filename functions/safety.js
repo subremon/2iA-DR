@@ -5,7 +5,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags
  * @param {object} options - 埋め込みのオプション
  * @param {string} options.title - タイトル
  * @param {string} options.description - 説明文
- * @param {import('discord.js').HexColorString} [options.color="#000000"] - 埋め込みの左側の色
+ * @param {import('discord.js').HexColorString} [options.color='#000000'] - 埋め込みの左側の色
  * @param {object} [options.author] - 埋め込みの作者情報 { name: <Str>, iconURL: <Str>, url: <Str> }
  * @param {object} [options.footer] - 埋め込みのフッター { text: <Str>, iconURL: <Str> }
  * @param {Date} [options.timestamp=new Date()] - 埋め込みの作成日時
@@ -19,7 +19,7 @@ function CreateEmbed(options) {
   const {
     title,
     description,
-    color = "#000000",
+    color = '#000000',
     author,
     footer,
     timestamp,
@@ -74,6 +74,36 @@ function CreateComponents() {
 }
 
 /**
+ * チャンネルを取得するためのヘルパー関数
+ * @param {import('discord.js').Client} client - DiscordClientインスタンス
+ * @param {string} guildId - サーバーID
+ * @param {string} channelId - チャンネルID
+ * @returns {Promise<import('discord.js').Channel>} - チャンネルオブジェクト
+ */
+async function getDiscord(client, guildId, channelId = null) {
+  try {
+    const guild = await client.guilds.fetch(guildId);
+    if (!guild) {
+      throw new Error('指定されたサーバーが見つかりません。');
+    }
+
+    if (channelId) {
+      const channel = await guild.channels.fetch(channelId);
+      if (!channel) {
+        throw new Error('指定されたチャンネルが見つかりません。');
+      }
+      return channel;
+    }
+
+    return guild; // ギルドIDのみが指定された場合はギルドを返す
+
+  } catch (err) {
+    console.error('getDiscordエラー:', err.message);
+    throw err;
+  }
+}
+
+/**
  * 安全にメッセージを送信するためのヘルパー関数
  * @param {import('discord.js').Client} client - DiscordClientインスタンス
  * @param {import('discord.js').Message} msg - Discordメッセージオブジェクト
@@ -123,4 +153,4 @@ async function SafeMessage(client, msg, text, type = 'send', silent = false, del
   }
 }
 
-module.exports = { CreateEmbed, SafeMessage };
+module.exports = { CreateEmbed, getDiscord, SafeMessage };

@@ -74,7 +74,7 @@ function getDefactoRandom(min, max, range, previousValue = null) {
     }
 
     if (possibleValues.length === 0) {
-        throw new Error("生成可能な乱数がありません。min, max, rangeの設定を見直してください。");
+        throw new Error('生成可能な乱数がありません。min, max, rangeの設定を見直してください。');
     }
 
     // 候補からランダムに1つ選択

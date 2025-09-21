@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
-const cron = require("node-cron");
-const { SafeMessage } = require('./functions/safety.js');
+const cron = require('node-cron');
+const { SafeMessage, getDiscord } = require('./functions/safety.js');
 const { basicDice }= require('./functions/dice.js');
 
 module.exports = function(client) {
@@ -9,14 +9,20 @@ module.exports = function(client) {
   client.once(Events.ClientReady, () => {
     console.log(`✅ main.js: Client is ready as ${client.user.tag}`);
 
+    cron.schedule('0 0 15 * * *', () => {
+      getDiscord('1085114259425472533', '1386427307761074268').send('test');
+    }, {
+      timezone: 'UTC'
+    });
+
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
 
       if (/(?<!\d)([R])(\d+)/i.test(msg.content)) {
-        SafeMessage(client, msg, "msg.contentに接触");
+        SafeMessage(client, msg, 'msg.contentに接触');
       }
       if (/(?<!\d)([R])(\d+)/i.test(msg)) {
-        SafeMessage(client, msg, "msgに接触");
+        SafeMessage(client, msg, 'msgに接触');
       }
 
       if (msg.mentions.users.has(client.user.id)) {

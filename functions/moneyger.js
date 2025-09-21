@@ -1,6 +1,6 @@
 const errors = {
-  missingUser: "エラー: 不明なユーザーID。\nその人が存在するか確認しください。",
-  missingBank: "その人の口座はまだ作成されていません。"
+  missingUser: 'エラー: 不明なユーザーID。\nその人が存在するか確認しください。',
+  missingBank: 'その人の口座はまだ作成されていません。'
 };
 
 /**
@@ -18,8 +18,8 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
   try {
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.user.id;
-    const takerId = dummyT || interaction.options.getUser("user")?.id;
-    const point = pointO || interaction.options.getInteger("point");
+    const takerId = dummyT || interaction.options.getUser('user')?.id;
+    const point = pointO || interaction.options.getInteger('point');
     const guildId = guildO || interaction.guild.id;
     
     // サーバーごとの通貨名を取得
@@ -81,7 +81,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
 async function MoneyHave(dbClient, interaction, guildO, dummy) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const userId = dummy || interaction.options.getUser("user")?.id || interaction.user.id;
+    const userId = dummy || interaction.options.getUser('user')?.id || interaction.user.id;
     const guildId = guildO || interaction.guild.id;
     
     // サーバーごとの通貨名を取得
@@ -113,8 +113,8 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
 async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const userId = dummy || interaction.options.getUser("user")?.id;
-    const point = pointO || interaction.options.getInteger("point");
+    const userId = dummy || interaction.options.getUser('user')?.id;
+    const point = pointO || interaction.options.getInteger('point');
     const guildId = guildO || interaction.guild.id;
 
     // サーバーごとの通貨名を取得
@@ -143,7 +143,7 @@ async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
 async function SetCurrency(dbClient, interaction, guildO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const new_currency = interaction.options.getString("currency_name");
+    const new_currency = interaction.options.getString('currency_name');
     const guildId = guildO || interaction.guild.id;
 
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
@@ -171,7 +171,7 @@ async function SetCurrency(dbClient, interaction, guildO) {
 async function SetInitial(dbClient, interaction, guildO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const new_initial_points = interaction.options.getInteger("initial_points");
+    const new_initial_points = interaction.options.getInteger('initial_points');
     const guildId = guildO || interaction.guild.id;
 
     const curResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
@@ -206,7 +206,7 @@ async function SetLogChannel(dbClient, interaction, channelO) {
     const initial_points = iniResult.rows[0]?.initial_points || 0;
 
     const guildId = interaction.guild.id;
-    const log_channel = channelO || interaction.options.getChannel("log_channel_locate")?.id;
+    const log_channel = channelO || interaction.options.getChannel('log_channel_locate')?.id;
 
 
     // データベースの更新をトランザクションで実行
@@ -240,7 +240,7 @@ async function LogModule(dbClient, interaction) {
       }
       return option.name; // 値がない場合（サブコマンドなど）
     })
-    .join(" ");
+    .join(' ');
 
   // サブコマンドを取得 (もしあれば)
   const subcommand = interaction.options.getSubcommand() || '';
@@ -271,17 +271,17 @@ module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLo
 /*
 
   if (point === 0) {
-    interaction.reply({content: "0以外で入力してください。", ephemeral: false, flags: MessageFlags.bitfield=4096});
+    interaction.reply({content: '0以外で入力してください。', ephemeral: false, flags: MessageFlags.bitfield=4096});
     return;
   }
-  if (type === "add_event" && searchId === "event") {
-    interaction.reply({content: "予期しないエラー。", ephemeral: false, flags: MessageFlags.bitfield=4096});
+  if (type === 'add_event' && searchId === 'event') {
+    interaction.reply({content: '予期しないエラー。', ephemeral: false, flags: MessageFlags.bitfield=4096});
   }
 
-  if (type === "add") {
+  if (type === 'add') {
     
   } else {
-    const bSearchId = type === "add_event" ? "960172159060279377" : String(interaction.user).match(/(\d*)/)[1];
+    const bSearchId = type === 'add_event' ? '960172159060279377' : String(interaction.user).match(/(\d*)/)[1];
     const bReg = new RegExp(`\\\n@${bSearchId}% : -?\\d+\\$`);
     const bMatches =  data.match(bReg);
     const bUserId = bMatches[0].match(/@(\d+)% : (-?\d+)/)[1];
@@ -300,7 +300,7 @@ module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLo
       const newData = data.replace(reg, retxt + '$');
       const bNewData = newData.replace(/\n@960172159060279377% : -?\d+\$/, bRetxt + '$');
       fs.writeFile('./bank.mng', bNewData, 'utf8', (err) => {
-          if (err) {interaction.reply({content: "エラー。", ephemeral: false, flags: MessageFlags.bitfield=4096});}
+          if (err) {interaction.reply({content: 'エラー。', ephemeral: false, flags: MessageFlags.bitfield=4096});}
       });
       
       if (point >= 1) {
@@ -314,7 +314,7 @@ module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLo
     }
       
   } else {
-    interaction.reply({content: "存在しないユーザーです。", ephemeral: false, flags: MessageFlags.bitfield=4096});
+    interaction.reply({content: '存在しないユーザーです。', ephemeral: false, flags: MessageFlags.bitfield=4096});
     return;
   }
 

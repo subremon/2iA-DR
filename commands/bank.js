@@ -84,7 +84,7 @@ module.exports = {
       const responses = [];
 
       // 通貨の設定
-      if (interaction.options.get("currency_name")) {
+      if (interaction.options.get('currency_name')) {
         const result = await SetCurrency(dbClient, interaction);
         if (result[0] === 'success') {
           const new_currency = result[1];
@@ -99,7 +99,7 @@ module.exports = {
       }
 
       // 初期金の設定
-      if (interaction.options.get("initial_points")) {
+      if (interaction.options.get('initial_points')) {
         const result2 = await SetInitial(dbClient, interaction);
         if (result2[0] === 'success') {
           const new_initial_points = result2[1];
@@ -114,7 +114,7 @@ module.exports = {
       }
 
       // 初期金の設定
-      if (interaction.options.get("log_channel_locate")) {
+      if (interaction.options.get('log_channel_locate')) {
         const result2 = await SetInitial(dbClient, interaction);
         if (result2[0] === 'success') {
           const log_channel = result2[1];
