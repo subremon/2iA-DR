@@ -39,4 +39,4 @@ function SafeMessage (client, msg, text, type = 'send', silent = false, delay = 
   }, delay);
 }
 
-module.exports = SafeMessage;
+module.exports = { SafeMessage };

@@ -1,7 +1,7 @@
 const { Events } = require('discord.js');
 const cron = require("node-cron");
-const SafeMessage = require('./functions/safety.js');
-const basicDice = require('./functions/dice.js');
+const { SafeMessage } = require('./functions/safety.js');
+const { basicDice }= require('./functions/dice.js');
 
 module.exports = function(client) {
   const TYPING_DELAY = 1000;
