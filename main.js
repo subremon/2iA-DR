@@ -13,10 +13,10 @@ module.exports = function(client) {
       if (msg.author.bot) return;
 
       if (/(?<!\d)([R])(\d+)/i.test(msg.content)) {
-        SafeMessage(client, msg, "msg.contentに接触", false, 0);
+        SafeMessage(client, msg, "msg.contentに接触");
       }
       if (/(?<!\d)([R])(\d+)/i.test(msg)) {
-        SafeMessage(client, msg, "msgに接触", false, 0);
+        SafeMessage(client, msg, "msgに接触");
       }
 
       if (msg.mentions.users.has(client.user.id)) {
