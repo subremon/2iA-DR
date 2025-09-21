@@ -88,12 +88,15 @@ function getDefactoRandom(min, max, range, previousValue = null) {
  * @returns {array} 結果コマンド, ロール結果
  */
 async function BasicDice(command) {
-  const match = command.match(/([A-Z])(\d+)/i);
-  if (!match) return ['無効なコマンド形式です。', null];
-  const max = Number(match[2]);
+  const match = command.match(/(\d+)([A-Z])(\d+)/i);
+  if (!matchMax) return ['無効なコマンド形式です。', null];
+  const min = matchMin ? Number(matchMin[1]) : 1;
+  const max = Number(matchMax[3]);
 
-  if (max < 1) return [`${command}\n-->x\serror:\s${match[1]}<number>\sは1以上にしてください。`, null];
+  if (min < 1) return [`${command}\n-->x\serror:\s${match[2]}<number>\sは1以上にしてください。`, null];
+  if (max < 1) return [`${command}\n-->x\serror:\s${match[2]}<number>\sは1以上にしてください。`, null];
   if (max > Number.MAX_SAFE_INTEGER) return [`$${command}\n-->x\serror:\s${match[1]}<number>\sは${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+
   const result = getRandomInt(1, max);
   return [`${command}\s-->\s${result}`, result];
 }
