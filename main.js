@@ -12,7 +12,7 @@ module.exports = function(client) {
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
 
-      if (/(?<!\d)([A-Z])(\d+)/i.test(msg)) {
+      if (/(?<!\d)([R])(\d+)/i.test(msg)) {
         SafeMessage(client, msg, basicDice(msg), false, 0);
       }
 

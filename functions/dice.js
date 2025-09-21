@@ -87,7 +87,7 @@ function getDefactoRandom(min, max, range, previousValue = null) {
  * @param {number} command コマンド文
  * @returns {number} ロール結果
  */
-function basicDice(command) {
+async function basicDice(command) {
   const match = command.match(/([A-Z])(\d+)/i);
   const max = match[2];
 
