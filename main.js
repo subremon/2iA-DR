@@ -12,8 +12,8 @@ module.exports = function(client) {
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
 
-      if (/(?<!\d)([R])(\d+)/i.test(msg)) {
-        SafeMessage(client, msg, basicDice(msg)[0], false, 0);
+      if (/(?<!\d)([R])(\d+)/i.test(msg.content)) {
+        SafeMessage(client, msg, basicDice(msg.content)[0], false, 0);
       }
 
       if (msg.mentions.users.has(client.user.id)) {
