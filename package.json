@@ -22,5 +22,8 @@
   },
   "author": "hantomme",
   "license": "CC0-1.0",
-  "private": true
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
 }
