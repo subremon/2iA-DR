@@ -10,7 +10,7 @@ module.exports = function(client) {
     console.log(`✅ main.js: Client is ready as ${client.user.tag}`);
 
     cron.schedule('0 0 15 * * *', () => {
-      getDiscord('1085114259425472533', '1386427307761074268').send('test');
+      GetDiscord('1085114259425472533', '1386427307761074268').send('test');
     }, {
       timezone: 'UTC'
     });
