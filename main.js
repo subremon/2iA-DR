@@ -19,7 +19,7 @@ module.exports = function(client) {
       if (msg.author.bot) return;
 
       if (/(?<!\d)([R])(\d+)/i.test(msg.content)) {
-        SafeMessage(client, msg, BasicDice(msg.content));
+        SafeMessage(client, msg, BasicDice(msg.content)[0]);
       }
 
       if (msg.mentions.users.has(client.user.id)) {
