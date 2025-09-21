@@ -18,7 +18,7 @@ module.exports = function(client) {
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
 
-      if (/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?\d*(?![^\d])[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/]\d*(?![^\d])[R]\d+))*/i.test(msg.content)) {
+      if (/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/i.test(msg.content)) {
         SafeMessage(client, msg, BasicDice(msg.content)[0]);
       }
 
