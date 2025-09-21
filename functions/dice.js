@@ -93,12 +93,12 @@ function BasicDice(command) {
   const min = match ? Number(match[1]) : 1;
   const max = Number(match[3]);
 
-  if (min < 1) return [`${command}\n-->x\serror:\s${match[2]}<number>\sは1以上にしてください。`, null];
-  if (max < 1) return [`${command}\n-->x\serror:\s${match[2]}<number>\sは1以上にしてください。`, null];
-  if (max > Number.MAX_SAFE_INTEGER) return [`$${command}\n-->x\serror:\s${match[1]}<number>\sは${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+  if (min < 1) return [`${command} -->x error: ${match[2]}<number> は1以上にしてください。`, null];
+  if (max < 1) return [`${command} -->x error: ${match[2]}<number> は1以上にしてください。`, null];
+  if (max > Number.MAX_SAFE_INTEGER) return [`$${command} -->x error: ${match[1]}<number>\sは${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
 
   const result = getRandomInt(1, max);
-  return [`${command}\s-->\s${result}`, result];
+  return [`${command} --> ${result}`, result];
 }
 
 module.exports = { BasicDice };
