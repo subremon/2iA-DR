@@ -44,64 +44,81 @@ function getRandomInt(min, max) {
 
 /**
  * 基本的なダイスを振ります。
- * @param {string} command コマンド文
- * @returns {array} 結果テキスト, ロール結果
+ * @param {string} command コマンド文（例: "2D6+3D4-5"）
+ * @returns {array} 結果テキスト, 合計値
  */
 function BasicDice(command) {
-  const match = command.match(/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?\d*[DR]\d+)+(?:([+\-*\/]\d+)|([+\-*\/]\d*[DR]\d+))*/i);
-  if (!match) return ['無効なコマンド形式です。', null];
-  if (/^\d+$/.test(match[0])) match[0] = `+${match[0]}`;
-  match.filter(el => el !== '');
+  // ランダム整数生成
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-  let midlleWork = '';
-  let error = null;
-  match.array.forEach(el => {
-    if(/[+\-*\/]?\d*[DR]\d+/i.test(el)) {
-      const match = el.match(/([+\-*\/])?(\d*)[DR](\d+)/i);
-      const number = match[2] ? Number(match[1]) : 1;
-      const faces = Number(match[3]);
+  // ダイスまたは数字のパターンをすべて抽出
+  const regex = /([+\-*/]?)(\d*[dD]\d+|\d+)/g;
+  const tokens = [];
+  let match;
 
-      if (number < 1) error = [`${command}\u00a0-->x error:\u00a0ダイスの数は1以上にしてください。`, null];
-      if (number > Number.MAX_SAFE_INTEGER) return [`$${command}\u00a0-->x error:\u00a0$ダイスの数は\u00a0は${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
-      if (faces < 1) error = [`${command}\u00a0-->x error:\u00a0面の数は1以上にしてください。`, null];
-      if (faces > Number.MAX_SAFE_INTEGER) return [`$${command}\u00a0-->x error:\u00a0$面の数は\u00a0は${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+  while ((match = regex.exec(command)) !== null) {
+    let operator = match[1] || '+';
+    let value = match[2];
 
-      let resultArray = [];
-      for (let i = 0; i < number; i++) {
-        resultArray.push(getRandomInt(1, faces));
+    if (value.toLowerCase().includes('d')) {
+      // ダイス表記
+      const parts = value.toLowerCase().match(/(\d*)d(\d+)/);
+      const count = parts[1] ? parseInt(parts[1], 10) : 1;
+      const faces = parseInt(parts[2], 10);
+
+      if (count < 1 || faces < 1) return [`${command} --> エラー: ダイスの数や面は1以上です。`, null];
+      if (count > Number.MAX_SAFE_INTEGER || faces > Number.MAX_SAFE_INTEGER)
+        return [`${command} --> エラー: ダイスの数や面は安全整数範囲内にしてください。`, null];
+
+      const rolls = [];
+      for (let i = 0; i < count; i++) {
+        rolls.push(getRandomInt(1, faces));
       }
 
-      result = resultArray.reduce((sum, current) => sum + current, 0);
-      midlleWork += `${resultArray.join(' ')}`;
+      tokens.push({ operator, type: 'd', count, faces, rolls });
     } else {
-      midlleWork += el;
+      // 数字
+      tokens.push({ operator, number: parseInt(value, 10) });
+    }
+  }
+
+  if (tokens.length === 0) return ['無効なコマンド形式です。', null];
+
+  // 計算
+  let sum = 0;
+  tokens.forEach((t, idx) => {
+    let val;
+    if (t.type === 'd') {
+      val = t.rolls.reduce((a, b) => a + b, 0);
+    } else {
+      val = t.number;
+    }
+
+    if (idx === 0 && t.operator === '+') {
+      sum = val; // 初回はプラスでも直接代入
+    } else {
+      switch (t.operator) {
+        case '+': sum += val; break;
+        case '-': sum -= val; break;
+        case '*': sum *= val; break;
+        case '/': sum /= val; break;
+      }
     }
   });
-  if (error) return error;
 
-  let sum = 0; 
-  for (let i = 0; i < match.length; i++) {
-    const element = match[index];
-    
-  }
+  // 表示用文字列作成
+  const display = tokens.map(t => {
+    if (t.type === 'd') {
+      const rollStr = t.rolls.length > 1 ? `[${t.rolls.join(',')}]` : `${t.rolls[0]}`;
+      return `${t.operator}${t.count}d${t.faces}${rollStr}`;
+    } else {
+      return `${t.operator}${t.number}`;
+    }
+  }).join(' ');
 
-
-  const number = match[1] ? Number(match[1]) : 1;
-  const faces = Number(match[3]);
-
-  if (number < 1) return [`${command}\u00a0-->x error:\u00a0ダイスの数は1以上にしてください。`, null];
-  if (faces < 1) return [`${command}\u00a0-->x error:\u00a0面の数は1以上にしてください。`, null];
-  if (faces > Number.MAX_SAFE_INTEGER) return [`$${command}\u00a0-->x error:\u00a0${match[1]}<number>\u00a0は${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
-
-  let resultArray = [];
-  for (let i = 0; i < number; i++) {
-    resultArray.push(getRandomInt(1, faces));
-  }
-
-  result = resultArray.reduce((sum, current) => sum + current, 0);
-  resultText = `${command}\u00a0(${number}d${faces}) -->\u00a0${result}[\u00a0${resultArray.join(', ')}\u00a0] -->\u00a0${result}`;
-
-  return [resultText, result];
+  return [`${command} --> ${display} --> ${sum}`, sum];
 }
 
 module.exports = { BasicDice };
