@@ -1,6 +1,7 @@
 const { Events } = require('discord.js');
+const cron = require("node-cron");
 const SafeMessage = require('./functions/safety.js');
-const basicDice = require('./functions/dice.js')
+const basicDice = require('./functions/dice.js');
 
 module.exports = function(client) {
   const TYPING_DELAY = 1000;
@@ -11,7 +12,7 @@ module.exports = function(client) {
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
 
-      if (/(?<!\d)([A-Z])(\d+)/i.test(message)) {
+      if (/(?<!\d)([A-Z])(\d+)/i.test(msg)) {
         SafeMessage(client, msg, basicDice(msg), false, 0);
       }
 
