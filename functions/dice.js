@@ -43,62 +43,65 @@ function getRandomInt(min, max) {
 }
 
 /**
- * min, max, rangeに基づいて乱数を生成する関数
- * @param {number} min 最小値（包含）
- * @param {number} max 最大値（包含）
- * @param {number} range 直前の値から除外する範囲
- * @param {number} [previousValue=null] 直前に生成された値
- * @returns {number} 分離された範囲内の乱数
- */
-function getDefactoRandom(min, max, range, previousValue = null) {
-    if (previousValue === null) {
-        // 初回実行時は通常の乱数を生成
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    // rangeの制約を考慮
-    // rangeがmin,maxの範囲を超える場合、生成可能な値は非常に限定される
-    // 例：バーカウンター問題のように、最も遠い席しか選べなくなる
-    const valuesToExclude = new Set();
-    for (let i = 0; i <= range; i++) {
-        // 直前の値とその左右の値をすべて除外
-        valuesToExclude.add(previousValue - i);
-        valuesToExclude.add(previousValue + i);
-    }
-
-    const possibleValues = [];
-    for (let i = min; i <= max; i++) {
-        if (!valuesToExclude.has(i)) {
-            possibleValues.push(i);
-        }
-    }
-
-    if (possibleValues.length === 0) {
-        throw new Error('生成可能な乱数がありません。min, max, rangeの設定を見直してください。');
-    }
-
-    // 候補からランダムに1つ選択
-    const randomIndex = Math.floor(Math.random() * possibleValues.length);
-    return possibleValues[randomIndex];
-}
-
-/**
  * 基本的なダイスを振ります。
  * @param {string} command コマンド文
- * @returns {array} 結果コマンド, ロール結果
+ * @returns {array} 結果テキスト, ロール結果
  */
 function BasicDice(command) {
-  const match = command.match(/(\d*)([A-Z])(\d+)/i);
+  const match = command.match(/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?\d*[DR]\d+)+(?:([+\-*\/]\d+)|([+\-*\/]\d*[DR]\d+))*/i);
   if (!match) return ['無効なコマンド形式です。', null];
-  const min = match ? Number(match[1]) : 1;
-  const max = Number(match[3]);
+  if (/^\d+$/.test(match[0])) match[0] = `+${match[0]}`;
+  match.filter(el => el !== '');
 
-  if (min < 1) return [`${command} -->x error: ${match[2]}<number> は1以上にしてください。`, null];
-  if (max < 1) return [`${command} -->x error: ${match[2]}<number> は1以上にしてください。`, null];
-  if (max > Number.MAX_SAFE_INTEGER) return [`$${command} -->x error: ${match[1]}<number>\sは${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+  let midlleWork = '';
+  let error = null;
+  match.array.forEach(el => {
+    if(/[+\-*\/]?\d*[DR]\d+/i.test(el)) {
+      const match = el.match(/([+\-*\/])?(\d*)[DR](\d+)/i);
+      const number = match[2] ? Number(match[1]) : 1;
+      const faces = Number(match[3]);
 
-  const result = getRandomInt(1, max);
-  return [`${command} --> ${result}`, result];
+      if (number < 1) error = [`${command}\u00a0-->x error:\u00a0ダイスの数は1以上にしてください。`, null];
+      if (number > Number.MAX_SAFE_INTEGER) return [`$${command}\u00a0-->x error:\u00a0$ダイスの数は\u00a0は${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+      if (faces < 1) error = [`${command}\u00a0-->x error:\u00a0面の数は1以上にしてください。`, null];
+      if (faces > Number.MAX_SAFE_INTEGER) return [`$${command}\u00a0-->x error:\u00a0$面の数は\u00a0は${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+
+      let resultArray = [];
+      for (let i = 0; i < number; i++) {
+        resultArray.push(getRandomInt(1, faces));
+      }
+
+      result = resultArray.reduce((sum, current) => sum + current, 0);
+      midlleWork += `${resultArray.join(' ')}`;
+    } else {
+      midlleWork += el;
+    }
+  });
+  if (error) return error;
+
+  let sum = 0; 
+  for (let i = 0; i < match.length; i++) {
+    const element = match[index];
+    
+  }
+
+
+  const number = match[1] ? Number(match[1]) : 1;
+  const faces = Number(match[3]);
+
+  if (number < 1) return [`${command}\u00a0-->x error:\u00a0ダイスの数は1以上にしてください。`, null];
+  if (faces < 1) return [`${command}\u00a0-->x error:\u00a0面の数は1以上にしてください。`, null];
+  if (faces > Number.MAX_SAFE_INTEGER) return [`$${command}\u00a0-->x error:\u00a0${match[1]}<number>\u00a0は${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
+
+  let resultArray = [];
+  for (let i = 0; i < number; i++) {
+    resultArray.push(getRandomInt(1, faces));
+  }
+
+  result = resultArray.reduce((sum, current) => sum + current, 0);
+  resultText = `${command}\u00a0(${number}d${faces}) -->\u00a0${result}[\u00a0${resultArray.join(', ')}\u00a0] -->\u00a0${result}`;
+
+  return [resultText, result];
 }
 
 module.exports = { BasicDice };
