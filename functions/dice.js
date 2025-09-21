@@ -87,11 +87,11 @@ function getDefactoRandom(min, max, range, previousValue = null) {
  * @param {string} command コマンド文
  * @returns {array} 結果コマンド, ロール結果
  */
-async function BasicDice(command) {
-  const match = command.match(/(\d+)([A-Z])(\d+)/i);
-  if (!matchMax) return ['無効なコマンド形式です。', null];
-  const min = matchMin ? Number(matchMin[1]) : 1;
-  const max = Number(matchMax[3]);
+function BasicDice(command) {
+  const match = command.match(/(\d*)([A-Z])(\d+)/i);
+  if (!match) return ['無効なコマンド形式です。', null];
+  const min = match ? Number(match[1]) : 1;
+  const max = Number(match[3]);
 
   if (min < 1) return [`${command}\n-->x\serror:\s${match[2]}<number>\sは1以上にしてください。`, null];
   if (max < 1) return [`${command}\n-->x\serror:\s${match[2]}<number>\sは1以上にしてください。`, null];
