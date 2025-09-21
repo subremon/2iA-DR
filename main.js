@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
 const cron = require('node-cron');
-const { SafeMessage, getDiscord } = require('./functions/safety.js');
+const { SafeMessage, GetDiscord } = require('./functions/safety.js');
 const { BasicDice }= require('./functions/dice.js');
 
 module.exports = function(client) {
