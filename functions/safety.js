@@ -45,23 +45,6 @@ function CreateEmbed(options) {
   return embed;
 }
 
-// 使い方:
-// 必要なオプションだけを指定して呼び出す
-const myEmbed = CreateEmbed({
-  title: '新しい埋め込み',
-  description: 'これはテストです。',
-  color: '#FF0000'
-});
-
-// すべてのオプションを指定
-const anotherEmbed = CreateEmbed({
-  title: 'タイトル',
-  description: '説明',
-  color: '#00FF00',
-  author: { name: '作者', iconURL: '...' },
-  fields: [{ name: 'フィールド', value: '値' }]
-});
-
 // コンポーネント（Components）を生成する関数
 function CreateComponents() {
   const row = new ActionRowBuilder().addComponents(
