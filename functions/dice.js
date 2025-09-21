@@ -95,7 +95,7 @@ async function BasicDice(command) {
   if (max < 1) return [`${command}\n-->x\serror:\s${match[1]}<number>\sは1以上にしてください。`, null];
   if (max > Number.MAX_SAFE_INTEGER) return [`$${command}\n-->x\serror:\s${match[1]}<number>\sは${Number.MAX_SAFE_INTEGER}以下にしてください。`, null];
   const result = getRandomInt(1, max);
-  return [`${command}\s-->\s${relust}`, result];
+  return [`${command}\s-->\s${result}`, result];
 }
 
 module.exports = { BasicDice };
