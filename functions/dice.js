@@ -84,8 +84,8 @@ function getDefactoRandom(min, max, range, previousValue = null) {
 
 /**
  * 基本的なダイスを振ります。
- * @param {number} command コマンド文
- * @returns {number} ロール結果
+ * @param {string} command コマンド文
+ * @returns {string} ロール結果
  */
 async function basicDice(command) {
   const match = command.match(/([A-Z])(\d+)/i);
@@ -93,7 +93,8 @@ async function basicDice(command) {
 
   if (max < 1) return `${command}\n-->x\serror:\s${match[1]}<number>\sは1以上にしてください。`;
   if (max > Number.MAX_SAFE_INTEGER) return `$${command}\n-->x\serror:\s${match[1]}<number>\sは${Number.MAX_SAFE_INTEGER}以下にしてください。`;
-  return `${command}\s-->\s${getRandomInt(1, max)}`;
+  const relust = getRandomInt(1, max);
+  return [`${command}\s-->\s${relust}`, relust];
 }
 
 module.exports = { basicDice };
