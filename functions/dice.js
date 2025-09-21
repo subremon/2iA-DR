@@ -47,7 +47,7 @@ function getRandomInt(min, max) {
  * @param {string} expr 式 (例: "(2+3)d(1d4+2)")
  * @returns [表示文字列, 合計値, 個別ロール配列]
  */
-function rollDiceExprFull(expr) {
+function BasicDice(expr) {
   function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
