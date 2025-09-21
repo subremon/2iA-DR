@@ -63,7 +63,7 @@ function CreateComponents() {
  * @param {string} channelId - チャンネルID
  * @returns {Promise<import('discord.js').Channel>} - チャンネルオブジェクト
  */
-async function getDiscord(client, guildId, channelId = null) {
+async function GetDiscord(client, guildId, channelId = null) {
   try {
     const guild = await client.guilds.fetch(guildId);
     if (!guild) {
@@ -136,4 +136,4 @@ async function SafeMessage(client, msg, text, type = 'send', silent = false, del
   }
 }
 
-module.exports = { CreateEmbed, getDiscord, SafeMessage };
+module.exports = { CreateEmbed, GetDiscord, SafeMessage };

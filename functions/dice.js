@@ -87,7 +87,7 @@ function getDefactoRandom(min, max, range, previousValue = null) {
  * @param {string} command コマンド文
  * @returns {string} ロール結果
  */
-async function basicDice(command) {
+async function BasicDice(command) {
   const match = command.match(/([A-Z])(\d+)/i);
   const max = match[2];
 
@@ -97,4 +97,4 @@ async function basicDice(command) {
   return [`${command}\s-->\s${relust}`, relust];
 }
 
-module.exports = { basicDice };
+module.exports = { BasicDice };

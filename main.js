@@ -1,7 +1,7 @@
 const { Events } = require('discord.js');
 const cron = require('node-cron');
 const { SafeMessage, getDiscord } = require('./functions/safety.js');
-const { basicDice }= require('./functions/dice.js');
+const { BasicDice }= require('./functions/dice.js');
 
 module.exports = function(client) {
   const TYPING_DELAY = 1000;
@@ -19,10 +19,7 @@ module.exports = function(client) {
       if (msg.author.bot) return;
 
       if (/(?<!\d)([R])(\d+)/i.test(msg.content)) {
-        SafeMessage(client, msg, 'msg.contentに接触');
-      }
-      if (/(?<!\d)([R])(\d+)/i.test(msg)) {
-        SafeMessage(client, msg, 'msgに接触');
+        SafeMessage(client, msg, BasicDice(msg.content));
       }
 
       if (msg.mentions.users.has(client.user.id)) {
