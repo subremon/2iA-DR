@@ -17,9 +17,10 @@ module.exports = function(client) {
 
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
-
-      if (/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/i.test(msg.content)) {
-        const command = msg.content.match(/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/i)[0];
+      
+      const basicDiceRegex = /(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/i;
+      if (basicDiceRegex.test(msg.content)) {
+        const command = msg.content.match(basicDiceRegex)[0];
         SafeMessage(client, msg, BasicDice(command)[0]);
       }
 
