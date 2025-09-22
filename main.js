@@ -19,7 +19,7 @@ module.exports = function(client) {
       if (msg.author.bot) return;
 
       if (/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/i.test(msg.content)) {
-        const command = msg.content.match(/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/)[0];
+        const command = msg.content.match(/(-?\d+)?([+\-*\/]\d+)*([+\-*\/]?(?<![a-zA-Z])\d*[R]\d+)+(?:([+\-*\/]\d+)|([+\-*\/](?<![a-zA-Z])\d*[R]\d+))*/i)[0];
         SafeMessage(client, msg, BasicDice(command)[0]);
       }
 
