@@ -73,7 +73,13 @@ function BasicDice(command) {
       const total = rolls.reduce((a, b) => a + b, 0);
 
       rollResults.push({operator, number, faces, rolls, total});
-      midlleWork.push(`${operator}${total}[${rolls.join(',')}]`);
+      if (midlleWork.length === 0) {
+        // 1個目は + を省略
+        midlleWork.push(`${total}[${rolls.join(',')}]`);
+      } else {
+        midlleWork.push(`${operator}${total}[${rolls.join(',')}]`);
+      }
+
 
       // 演算
       if (operator === '+') sumAll += total;
@@ -88,7 +94,12 @@ function BasicDice(command) {
       const num = Number(el.replace(/[+\-*\/]/, ''));
 
       rollResults.push({operator, total: num});
-      midlleWork.push(`${operator}${num}`);
+      if (midlleWork.length === 0) {
+        midlleWork.push(`${num}`);
+      } else {
+        midlleWork.push(`${operator}${num}`);
+      }
+
 
       if (operator === '+') sumAll += num;
       else if (operator === '-') sumAll -= num;
@@ -107,5 +118,7 @@ function getRandomInt(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+// ^^ とりあえず仮
 
 module.exports = { BasicDice };
