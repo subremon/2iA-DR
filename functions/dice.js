@@ -43,100 +43,69 @@ function getRandomInt(min, max) {
 }
 
 /**
- * 括弧付き式対応ダイス関数（演算優先度・個別ロール表示）
- * @param {string} expr 式 (例: "(2+3)d(1d4+2)")
- * @returns [表示文字列, 合計値, 個別ロール配列]
+ * 基本的なダイスを振ります。
+ * @param {string} command コマンド文
+ * @returns {array} 結果テキスト, 個別ロール結果
  */
-function BasicDice(expr) {
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+function BasicDice(command) {
+  // 正規表現: 英字直前にない d/R のダイス表記 or 数字
+  const regex = /(?<![a-zA-Z])(\d*)([dR])(\d+)|([+\-*\/]?\d+)/gi;
+  const matches = [...command.matchAll(regex)];
 
-  // トークン化用正規表現
-  const tokenRegex = /\d+d\d+|\d+|[()+\-*/]/gi;
+  if (!matches.length) return ['無効なコマンド形式です。', null];
 
-  // ダイスや数字、演算子をトークン化
-  function tokenize(s) {
-    return s.match(tokenRegex) || [];
-  }
+  let sumAll = 0;
+  let rollResults = [];
+  let midlleWork = [];
 
-  // 再帰評価関数
-  function parse(tokens) {
-    const values = [];
-    const operators = [];
-    const rollsLog = [];
+  for (let m of matches) {
+    if (m[2]) { // ダイス表記
+      const operator = m[1] && m[1].match(/[+\-*\/]/) ? m[1] : '+';
+      const number = m[1] ? Number(m[1]) : 1;
+      const faces = Number(m[3]);
 
-    function applyOp() {
-      const b = values.pop();
-      const a = values.pop();
-      const op = operators.pop();
-      switch(op) {
-        case '+': values.push(a + b); break;
-        case '-': values.push(a - b); break;
-        case '*': values.push(a * b); break;
-        case '/': values.push(a / b); break;
+      if (number < 1 || faces < 1) return [`${command} --> x error: 数字は1以上にしてください。`, null];
+
+      let rolls = [];
+      for (let j = 0; j < number; j++) {
+        rolls.push(getRandomInt(1, faces));
       }
+      const total = rolls.reduce((a, b) => a + b, 0);
+
+      rollResults.push({operator, number, faces, rolls, total});
+      midlleWork.push(`${operator}${total}[${rolls.join(',')}]`);
+
+      // 演算
+      if (operator === '+') sumAll += total;
+      else if (operator === '-') sumAll -= total;
+      else if (operator === '*') sumAll *= total;
+      else if (operator === '/') sumAll /= total;
+
+    } else if (m[4]) { // 数字
+      let el = m[4];
+      const operatorMatch = el.match(/[+\-*\/]/);
+      const operator = operatorMatch ? operatorMatch[0] : '+';
+      const num = Number(el.replace(/[+\-*\/]/, ''));
+
+      rollResults.push({operator, total: num});
+      midlleWork.push(`${operator}${num}`);
+
+      if (operator === '+') sumAll += num;
+      else if (operator === '-') sumAll -= num;
+      else if (operator === '*') sumAll *= num;
+      else if (operator === '/') sumAll /= num;
     }
-
-    let i = 0;
-    while (i < tokens.length) {
-      const t = tokens[i];
-      if (/^\d+d\d+$/i.test(t)) {
-        // ダイス
-        const [nStr,fStr] = t.toLowerCase().split('d');
-        const n = parseInt(nStr,10);
-        const f = parseInt(fStr,10);
-        const rolls = [];
-        for(let j=0;j<n;j++) rolls.push(getRandomInt(1,f));
-        rollsLog.push({count:n, faces:f, rolls:rolls.slice()});
-        values.push(rolls.reduce((a,b)=>a+b,0));
-        i++;
-      } else if (/^\d+$/.test(t)) {
-        values.push(parseInt(t,10));
-        i++;
-      } else if (t==='(') {
-        // 括弧内を探す
-        let depth=1, j=i+1;
-        while(j<tokens.length && depth>0){
-          if(tokens[j]==='(') depth++;
-          if(tokens[j]===')') depth--;
-          j++;
-        }
-        if(depth>0) throw new Error("括弧が閉じられていません");
-        const subTokens = tokens.slice(i+1,j-1);
-        values.push(parse(subTokens).total);
-        rollsLog.push(...parse(subTokens).rollsLog); // 中のロールも記録
-        i=j;
-      } else if (/[+\-*/]/.test(t)) {
-        while(operators.length>0 &&
-             ( (t==='+'||t==='-') && (operators[operators.length-1]==='*'||operators[operators.length-1]==='/') ||
-               (t==='+'||t==='-'||t==='*'||t==='/') ) ) {
-          applyOp();
-        }
-        operators.push(t);
-        i++;
-      } else {
-        throw new Error("不正なトークン: "+t);
-      }
-    }
-
-    while(operators.length>0) applyOp();
-
-    return {total: values[0], rollsLog};
   }
 
-  try {
-    const tokens = tokenize(expr);
-    const {total, rollsLog} = parse(tokens);
+  const formattedCommand = matches.map(m => m[0]).join('');
+  return [`${formattedCommand} --> ${midlleWork.join(' ')} --> ${sumAll}`, rollResults];
+}
 
-    // 表示用文字列作成
-    const rollStr = rollsLog.map(r => `${r.count}d${r.faces}[${r.rolls.join(',')}]`).join(' + ');
-    const display = rollStr ? `${expr} --> ${rollStr} --> ${total}` : `${expr} --> ${total}`;
-
-    return [display, total, rollsLog];
-  } catch(err) {
-    return [`${expr} --> エラー: ${err.message}`, null, null];
-  }
+// 1~maxの整数を返すユーティリティ
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 module.exports = { BasicDice };
