@@ -23,10 +23,10 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const guildId = guildO || interaction.guild.id;
     
     // サーバーごとの通貨名を取得
-    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
     
-    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const ini = iniResult.rows[0]?.initial_points || 0;
 
     // ユーザーIDが存在しない場合はエラー
@@ -34,18 +34,18 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
       return ['error', errors.missingUser];
     }
 
-    const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
+    const SELECTUSER = `SELECT have_money FROM server_users_bank WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
 
     // 贈与者と授与者の口座情報を取得
     const giverResult = await dbClient.query(SELECTUSER, [guildId, giverId]);
     const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
     const giverUPSERT = giverResult.rows.length === 0 ? 
-    `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
+    `INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
+    `UPDATE server_users_bank SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
     const takerUPSERT = takerResult.rows.length === 0 ? 
-    `INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE server_users SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
+    `INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
+    `UPDATE server_users_bank SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
     // 新しい所持金を計算
     const giverHave = giverResult.rows[0]?.have_money || ini;
@@ -85,10 +85,10 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
     const guildId = guildO || interaction.guild.id;
     
     // サーバーごとの通貨名を取得
-    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
 
-    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const ini = iniResult.rows[0]?.initial_points || 0;
 
     // ユーザーIDが存在しない場合はエラー
@@ -96,7 +96,7 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
       return ['error', errors.missingUser];
     }
 
-    const SELECTUSER = `SELECT have_money FROM server_users WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
+    const SELECTUSER = `SELECT have_money FROM server_users_bank WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
 
     // 贈与者と授与者の口座情報を取得
     const userResult = await dbClient.query(SELECTUSER, [guildId, userId]);
@@ -118,14 +118,14 @@ async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
     const guildId = guildO || interaction.guild.id;
 
     // サーバーごとの通貨名を取得
-    const uniResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO server_users (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money`, [guildId, userId, point]);
+      await dbClient.query(`INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money`, [guildId, userId, point]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
@@ -146,14 +146,14 @@ async function SetCurrency(dbClient, interaction, guildO) {
     const new_currency = interaction.options.getString('currency_name');
     const guildId = guildO || interaction.guild.id;
 
-    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const initial_points = iniResult.rows[0]?.initial_points || 0;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points) VALUES ($1, $2, $3) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name`, [guildId, new_currency, initial_points]);
+      await dbClient.query(`INSERT INTO servers_bank (server_id, currency_name, initial_points) VALUES ($1, $2, $3) ON CONFLICT (server_id) DO UPDATE SET currency_name = EXCLUDED.currency_name RETURNING currency_name`, [guildId, new_currency, initial_points]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
@@ -174,14 +174,14 @@ async function SetInitial(dbClient, interaction, guildO) {
     const new_initial_points = interaction.options.getInteger('initial_points');
     const guildId = guildO || interaction.guild.id;
 
-    const curResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const curResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const currency = curResult.rows[0]?.currency_name || 'P';
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points) VALUES ($1, $2, $3) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, currency, new_initial_points]);
+      await dbClient.query(`INSERT INTO servers_bank (server_id, currency_name, initial_points) VALUES ($1, $2, $3) ON CONFLICT (server_id) DO UPDATE SET initial_points = EXCLUDED.initial_points RETURNING initial_points`, [guildId, currency, new_initial_points]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
@@ -199,10 +199,10 @@ async function SetInitial(dbClient, interaction, guildO) {
 async function SetLogChannel(dbClient, interaction, channelO) {
   try {
     // 贈与者と授与者のIDとポイントを取得
-    const curResult = await dbClient.query(`SELECT currency_name FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const curResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const currency = curResult.rows[0]?.currency_name || 'P';
     
-    const iniResult = await dbClient.query(`SELECT initial_points FROM servers WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const initial_points = iniResult.rows[0]?.initial_points || 0;
 
     const guildId = interaction.guild.id;
@@ -213,7 +213,7 @@ async function SetLogChannel(dbClient, interaction, channelO) {
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers (server_id, currency_name, initial_points, log_channel_name) VALUES ($1, $2, $3, $4) ON CONFLICT (server_id) DO UPDATE SET log_channel_name = EXCLUDED.log_channel_name RETURNING log_channel_name`, [guildId, currency, initial_points, log_channel]);
+      await dbClient.query(`INSERT INTO servers_bank (server_id, currency_name, initial_points, log_channel_name) VALUES ($1, $2, $3, $4) ON CONFLICT (server_id) DO UPDATE SET log_channel_name = EXCLUDED.log_channel_name RETURNING log_channel_name`, [guildId, currency, initial_points, log_channel]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');
@@ -254,7 +254,7 @@ async function LogModule(dbClient, interaction) {
     in: <#${channelId}>
   `.trim(); // 余分な空白を削除
 
-  const logResult = await dbClient.query(`SELECT log_channel_id FROM servers WHERE server_id = $1 LIMIT 1`, [interaction.guild.id]);
+  const logResult = await dbClient.query(`SELECT log_channel_id FROM servers_bank WHERE server_id = $1 LIMIT 1`, [interaction.guild.id]);
   const log_channel = logResult.rows[0]?.log_channel_id;
 
   if (log_channel) {
@@ -264,58 +264,4 @@ async function LogModule(dbClient, interaction) {
   return subcommand;
 }
 
-module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLogChannel, LogModule }; // ここが重要
-
-  
-
-/*
-
-  if (point === 0) {
-    interaction.reply({content: '0以外で入力してください。', ephemeral: false, flags: MessageFlags.bitfield=4096});
-    return;
-  }
-  if (type === 'add_event' && searchId === 'event') {
-    interaction.reply({content: '予期しないエラー。', ephemeral: false, flags: MessageFlags.bitfield=4096});
-  }
-
-  if (type === 'add') {
-    
-  } else {
-    const bSearchId = type === 'add_event' ? '960172159060279377' : String(interaction.user).match(/(\d*)/)[1];
-    const bReg = new RegExp(`\\\n@${bSearchId}% : -?\\d+\\$`);
-    const bMatches =  data.match(bReg);
-    const bUserId = bMatches[0].match(/@(\d+)% : (-?\d+)/)[1];
-    const bUserPoint = Number(bMatches[0].match(/@(\d+)% : -?(\d+)/)[2]);
-    const bUserAdd = bUserPoint - point;
-  }
-  if (matches && bMatches) {
-    if (bUserAdd >= 0) {
-      const userId = matches[0].match(/@(\d+)% : (-?\d+)/)[1];
-      const userPoint = Number(matches[0].match(/@(\d+)% : -?(\d+)/)[2]);
-      const userAdd = userPoint + point;
-
-      const retxt = `\n@${userId}% : ${userAdd}`;
-      const bRetxt = `\n@${bUserId}% : ${bUserAdd}`;
-      
-      const newData = data.replace(reg, retxt + '$');
-      const bNewData = newData.replace(/\n@960172159060279377% : -?\d+\$/, bRetxt + '$');
-      fs.writeFile('./bank.mng', bNewData, 'utf8', (err) => {
-          if (err) {interaction.reply({content: 'エラー。', ephemeral: false, flags: MessageFlags.bitfield=4096});}
-      });
-      
-      if (point >= 1) {
-        interaction.reply({content: `イベント報酬！ <@${userId}>に${point+uni}配布しました。現在${userAdd+uni}です。\n-# あと${bUserAdd+uni}配布可能`, flags: MessageFlags.bitfield=4096}); 
-      } else {
-        interaction.reply({content: `<@${userId}>への配布${uni}を${point}しました。現在${userAdd+uni}です。\n-# あと${bUserAdd+uni}配布可能`, flags: MessageFlags.bitfield=4096});
-      }
-      
-    } else {
-      interaction.reply({content: `これ以上配布できません！\n-# ${-bUserAdd+uni}減らしてください`, ephemeral: false, flags: MessageFlags.bitfield=4096});
-    }
-      
-  } else {
-    interaction.reply({content: '存在しないユーザーです。', ephemeral: false, flags: MessageFlags.bitfield=4096});
-    return;
-  }
-
-  */
+module.exports = { MoneyPay, MoneyHave, SetMoney, SetCurrency, SetInitial, SetLogChannel, LogModule };
