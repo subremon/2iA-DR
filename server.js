@@ -20,12 +20,21 @@ const client = new Client({
 client.commands = new Collection();
 
 async function connectToDatabases() {
+  // 修正箇所: 接続URIを格納する環境変数（例: DATABASE_URL）を使用
+  const connectionString = process.env.DATABASE_URL; 
+  
+  if (!connectionString) {
+      console.error('❌ 環境変数 DATABASE_URL が設定されていません。');
+      throw new Error('DATABASE_URL is not set.');
+  }
+
+  // PGClientに接続URI文字列を直接渡す
   const dbClient = new PGClient({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: connectionString, // または new PGClient(connectionString)
+    // Supabaseに接続する場合、Renderのようなクラウド環境から接続する際はSSL接続が必須となることが多いです
+    ssl: {
+      rejectUnauthorized: false // Herokuや一部のクラウドホスティングで必要になる設定（セキュリティ上の注意が必要）
+    }
   });
 
   try {
