@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -20,26 +20,27 @@ const client = new Client({
 client.commands = new Collection();
 
 async function connectToDatabases() {
-  const connectionString = process.env.DATABASE_URL; 
+  const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-      console.error('❌ 環境変数 DATABASE_URL が設定されていません。接続を中止します。');
-      // 明示的にエラーを投げることで、ログで問題をすぐに特定できます。
-      throw new Error('FATAL: DATABASE_URL is not set in Render Environment.'); 
+      throw new Error('FATAL: DATABASE_URL is not set.');
   }
 
-  // 接続クライアントの定義
+  // PGClientに接続URI文字列を直接渡すか、{ connectionString: string } の形式で渡す
   const dbClient = new PGClient({
     connectionString: connectionString, 
-    ssl: { rejectUnauthorized: false }
+    // SupabaseはSSL必須。Render環境から接続するために必要
+    ssl: { 
+      rejectUnauthorized: false 
+    }
   });
 
   try {
     await dbClient.connect();
     console.log('✅ Bankデータベースに接続しました。');
-
     return dbClient;
   } catch (err) {
+    // ... エラー処理
     console.error('❌ データベース接続エラー:', err);
     throw err;
   }
