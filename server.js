@@ -20,21 +20,21 @@ const client = new Client({
 client.commands = new Collection();
 
 async function connectToDatabases() {
-  // 修正箇所: 接続URIを格納する環境変数（例: DATABASE_URL）を使用
   const connectionString = process.env.DATABASE_URL; 
   
+  // 👈 デバッグ用の出力コードを追加
+  console.log('--- DEBUG: DATABASE_URL VALUE ---:', connectionString ? 'Set (Length: ' + connectionString.length + ')' : 'UNDEFINED');
+
   if (!connectionString) {
-      console.error('❌ 環境変数 DATABASE_URL が設定されていません。');
-      throw new Error('DATABASE_URL is not set.');
+      console.error('❌ 環境変数 DATABASE_URL が設定されていません。接続を中止します。');
+      // 明示的にエラーを投げることで、ログで問題をすぐに特定できます。
+      throw new Error('FATAL: DATABASE_URL is not set in Render Environment.'); 
   }
 
-  // PGClientに接続URI文字列を直接渡す
+  // 接続クライアントの定義
   const dbClient = new PGClient({
-    connectionString: connectionString, // または new PGClient(connectionString)
-    // Supabaseに接続する場合、Renderのようなクラウド環境から接続する際はSSL接続が必須となることが多いです
-    ssl: {
-      rejectUnauthorized: false // Herokuや一部のクラウドホスティングで必要になる設定（セキュリティ上の注意が必要）
-    }
+    connectionString: connectionString, 
+    ssl: { rejectUnauthorized: false }
   });
 
   try {
