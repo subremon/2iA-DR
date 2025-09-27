@@ -21,11 +21,11 @@ client.commands = new Collection();
 
 async function connectToDatabases() {
   const dbClient = new PGClient({
-    user: process.env.BANK_DB_USER,
-    host: process.env.BANK_DB_HOST,
-    database: process.env.BANK_DB_NAME,
-    password: process.env.BANK_DB_PASSWORD,
-    port: process.env.BANK_DB_PORT,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
   });
 
   try {
