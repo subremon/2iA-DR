@@ -20,10 +20,10 @@ const client = new Client({
 client.commands = new Collection();
 
 async function connectToDatabases() {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DB_URL;
 
   if (!connectionString) {
-      throw new Error('FATAL: DATABASE_URL is not set.');
+      throw new Error('FATAL: DB_URL is not set.');
   }
 
   // PGClientに接続URI文字列を直接渡すか、{ connectionString: string } の形式で渡す
