@@ -21,9 +21,6 @@ client.commands = new Collection();
 
 async function connectToDatabases() {
   const connectionString = process.env.DATABASE_URL; 
-  
-  // 👈 デバッグ用の出力コードを追加
-  console.log('--- DEBUG: DATABASE_URL VALUE ---:', connectionString ? 'Set (Length: ' + connectionString.length + ')' : 'UNDEFINED');
 
   if (!connectionString) {
       console.error('❌ 環境変数 DATABASE_URL が設定されていません。接続を中止します。');
