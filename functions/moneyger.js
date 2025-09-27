@@ -4,6 +4,39 @@ const errors = {
 };
 
 /**
+ * データベースでテーブルの存在を確認し、存在しない場合は作成する
+ * @param {object} dbClient - PostgreSQLデータベースクライアント
+ */
+async function createTables(dbClient) {
+  const serversBankTableSql = `
+    CREATE TABLE IF NOT EXISTS servers_bank (
+      server_id VARCHAR(20) PRIMARY KEY,
+      currency_name VARCHAR(20) DEFAULT 'P',
+      initial_points INTEGER DEFAULT 0,
+      log_channel_id VARCHAR(20)
+    );
+  `;
+  const serverUsersBankTableSql = `
+    CREATE TABLE IF NOT EXISTS server_users_bank (
+      server_id VARCHAR(20) REFERENCES servers_bank(server_id),
+      user_id VARCHAR(20),
+      have_money BIGINT DEFAULT 0,
+      PRIMARY KEY (server_id, user_id)
+    );
+  `;
+
+  try {
+    console.log('テーブルの存在を確認し、必要に応じて作成します...');
+    await dbClient.query(serversBankTableSql);
+    await dbClient.query(serverUsersBankTableSql);
+    console.log('テーブルのセットアップが完了しました。');
+  } catch (error) {
+    console.error('データベーステーブルの作成中にエラーが発生しました:', error);
+    throw error;
+  }
+}
+
+/**
  * データベースで所持金を操作する
  * @param {object} dbClient - PostgreSQLデータベースクライアント
  * @param {object} interaction - Discordインタラクションオブジェクト
@@ -16,16 +49,18 @@ const errors = {
  */
 async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, unlimit = false, overlimit = false) {
   try {
+    await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
+
     // 贈与者と授与者のIDとポイントを取得
     const giverId = dummyG || interaction.user.id;
     const takerId = dummyT || interaction.options.getUser('user')?.id;
     const point = pointO || interaction.options.getInteger('point');
     const guildId = guildO || interaction.guild.id;
-    
+
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
-    
+
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const ini = iniResult.rows[0]?.initial_points || 0;
 
@@ -40,12 +75,12 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const giverResult = await dbClient.query(SELECTUSER, [guildId, giverId]);
     const takerResult = await dbClient.query(SELECTUSER, [guildId, takerId]);
 
-    const giverUPSERT = giverResult.rows.length === 0 ? 
-    `INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE server_users_bank SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
-    const takerUPSERT = takerResult.rows.length === 0 ? 
-    `INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` : 
-    `UPDATE server_users_bank SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
+    const giverUPSERT = giverResult.rows.length === 0 ?
+      `INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` :
+      `UPDATE server_users_bank SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
+    const takerUPSERT = takerResult.rows.length === 0 ?
+      `INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money` :
+      `UPDATE server_users_bank SET have_money = $3 WHERE server_id = $1 AND user_id = $2 RETURNING have_money`;
 
     // 新しい所持金を計算
     const giverHave = giverResult.rows[0]?.have_money || ini;
@@ -80,10 +115,12 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
 
 async function MoneyHave(dbClient, interaction, guildO, dummy) {
   try {
+    await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
+
     // 贈与者と授与者のIDとポイントを取得
     const userId = dummy || interaction.options.getUser('user')?.id || interaction.user.id;
     const guildId = guildO || interaction.guild.id;
-    
+
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
@@ -112,6 +149,8 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
 
 async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
   try {
+    await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
+
     // 贈与者と授与者のIDとポイントを取得
     const userId = dummy || interaction.options.getUser('user')?.id;
     const point = pointO || interaction.options.getInteger('point');
@@ -142,6 +181,8 @@ async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
 
 async function SetCurrency(dbClient, interaction, guildO) {
   try {
+    await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
+
     // 贈与者と授与者のIDとポイントを取得
     const new_currency = interaction.options.getString('currency_name');
     const guildId = guildO || interaction.guild.id;
@@ -170,6 +211,8 @@ async function SetCurrency(dbClient, interaction, guildO) {
 
 async function SetInitial(dbClient, interaction, guildO) {
   try {
+    await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
+
     // 贈与者と授与者のIDとポイントを取得
     const new_initial_points = interaction.options.getInteger('initial_points');
     const guildId = guildO || interaction.guild.id;
@@ -198,22 +241,22 @@ async function SetInitial(dbClient, interaction, guildO) {
 
 async function SetLogChannel(dbClient, interaction, channelO) {
   try {
-    // 贈与者と授与者のIDとポイントを取得
-    const curResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
-    const currency = curResult.rows[0]?.currency_name || 'P';
-    
-    const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
-    const initial_points = iniResult.rows[0]?.initial_points || 0;
+    await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
 
     const guildId = interaction.guild.id;
     const log_channel = channelO || interaction.options.getChannel('log_channel_locate')?.id;
 
+    const curResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const currency = curResult.rows[0]?.currency_name || 'P';
+
+    const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
+    const initial_points = iniResult.rows[0]?.initial_points || 0;
 
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
       // 贈与者の残高を更新
-      await dbClient.query(`INSERT INTO servers_bank (server_id, currency_name, initial_points, log_channel_name) VALUES ($1, $2, $3, $4) ON CONFLICT (server_id) DO UPDATE SET log_channel_name = EXCLUDED.log_channel_name RETURNING log_channel_name`, [guildId, currency, initial_points, log_channel]);
+      await dbClient.query(`INSERT INTO servers_bank (server_id, currency_name, initial_points, log_channel_id) VALUES ($1, $2, $3, $4) ON CONFLICT (server_id) DO UPDATE SET log_channel_id = EXCLUDED.log_channel_id RETURNING log_channel_id`, [guildId, currency, initial_points, log_channel]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
       await dbClient.query('ROLLBACK');

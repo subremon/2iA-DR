@@ -101,8 +101,8 @@ async function initialize() {
   try {
     dbClient = await connectToDatabases();
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Express server is listening on port ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Express server is listening on port ${PORT} on host 0.0.0.0`);
     });
 
     await client.login(process.env.BOT_TOKEN);
