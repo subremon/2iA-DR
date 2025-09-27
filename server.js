@@ -4,7 +4,6 @@ const path = require('path');
 const express = require('express');
 const { Client, REST, Routes, GatewayIntentBits, Events, Collection } = require('discord.js');
 const { Client: PGClient } = require('pg');
-const postgres = require('postgres');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,8 +28,17 @@ async function connectToDatabases() {
       throw new Error('DATABASE_URL is not set.');
   }
 
+  // PGClientに接続URI文字列を直接渡す
+  const dbClient = new PGClient({
+    connectionString: connectionString, // または new PGClient(connectionString)
+    // Supabaseに接続する場合、Renderのようなクラウド環境から接続する際はSSL接続が必須となることが多いです
+    ssl: {
+      rejectUnauthorized: false // Herokuや一部のクラウドホスティングで必要になる設定（セキュリティ上の注意が必要）
+    }
+  });
+
   try {
-  const dbClient = postgres(connectionString);
+    await dbClient.connect();
     console.log('✅ Bankデータベースに接続しました。');
 
     return dbClient;
