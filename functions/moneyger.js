@@ -36,6 +36,24 @@ async function createTables(dbClient) {
   }
 }
 
+/*
+ * servers_bank にサーバーIDが存在することを保証する（初期設定）
+ * @param {object} dbClient - PostgreSQLデータベースクライアント
+ * @param {string} guildId - ギルドID
+ */
+async function ensureServerInitialized(dbClient, guildId) {
+    const defaultCurrency = 'P';
+    const defaultInitialPoints = 0;
+    
+    // サーバーIDが存在しない場合は挿入（ON CONFLICTで競合を無視）
+    const sql = `
+        INSERT INTO servers_bank (server_id, currency_name, initial_points) 
+        VALUES ($1, $2, $3) 
+        ON CONFLICT (server_id) DO NOTHING;
+    `;
+    await dbClient.query(sql, [guildId, defaultCurrency, defaultInitialPoints]);
+}
+
 /**
  * データベースで所持金を操作する
  * @param {object} dbClient - PostgreSQLデータベースクライアント
@@ -56,6 +74,7 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     const takerId = dummyT || interaction.options.getUser('user')?.id;
     const point = pointO || interaction.options.getInteger('point');
     const guildId = guildO || interaction.guild.id;
+    await ensureServerInitialized(dbClient, guildId); 
 
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
