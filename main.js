@@ -20,7 +20,7 @@ module.exports = function(client) {
       
       const basicDiceRegex = /(-?\d+)?([+\-*\/]\s?\d+)*\s?([+\-*\/]?\s?(?<![a-zA-Z])\d*\s?[R]\s?\d+)+((\s?[+\-*\/]\s?\d+)|([+\-*\/](?<![a-zA-Z])\d*\s?[R]\d+\s?))*/i;
       if (basicDiceRegex.test(msg.content)) {
-        const command = msg.content.match(basicDiceRegex)[0].replaceAll(/\s/, '');
+        const command = msg.content.match(basicDiceRegex)[0].replaceAll(/\s/g, '');
         SafeMessage(client, msg, BasicDice(command)[0]);
       }
 
