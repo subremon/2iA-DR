@@ -287,6 +287,15 @@ async function LogModule(dbClient, interaction) {
 
   // サブコマンドを取得 (もしあれば)
   const subcommand = interaction.options.getSubcommand() || '';
+  
+
+  try {
+    await createTables(dbClient); 
+  } catch (e) {
+    console.error("LogModuleでのテーブル作成中にエラー:", e);
+    // テーブル作成が失敗した場合、ログ機能は諦める
+    return interaction.subcommand; 
+  }
 
   // チャンネル名を取得
   const channelId = interaction.channel?.id || '000000000000000000';
@@ -301,7 +310,11 @@ async function LogModule(dbClient, interaction) {
   const log_channel = logResult.rows[0]?.log_channel_id;
 
   if (log_channel) {
-    interaction.guild.channels.cache.get(log_channel).send(logMessage);
+    try {
+        interaction.guild.channels.cache.get(log_channel).send(logMessage);
+    } catch (e) {
+        console.error("ログチャンネルへの送信に失敗しました:", e);
+    }
   }
 
   return subcommand;
