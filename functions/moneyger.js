@@ -1,6 +1,7 @@
 const errors = {
   missingUser: 'エラー: 不明なユーザーID。\nその人が存在するか確認しください。',
-  missingBank: 'その人の口座はまだ作成されていません。'
+  missingBank: 'その人の口座はまだ作成されていません。',
+  isBot: 'BOTではないユーザを選択してください。'
 };
 
 /**
@@ -70,23 +71,37 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
     await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
 
     // 贈与者と授与者のIDとポイントを取得
-    const giverId = dummyG || interaction.user.id;
-    const takerId = dummyT || interaction.options.getUser('user')?.id;
+    const giverUser = dummyG ? null : interaction.user; // interaction.userは必ず存在
+    const takerUser = dummyT ? null : interaction.options.getUser('user'); // ユーザーオブジェクト
+
+    const giverId = dummyG || giverUser.id;
+    const takerId = dummyT || takerUser?.id;
     const point = pointO || interaction.options.getInteger('point');
     const guildId = guildO || interaction.guild.id;
     await ensureServerInitialized(dbClient, guildId); 
 
+    // ユーザーIDが存在しない場合はエラー
+    if (!takerId) {
+      return ['error', errors.missingUser];
+    }
+    
+    // 贈与者（interaction.user）のBOTチェック（dummyGがない場合）
+    if (giverUser && giverUser.bot) {
+        // 贈与者がボットの場合は通常、エラーにはしないが、ここでは念のためチェック
+        // ただし、通常この関数はユーザーからの操作で呼び出されるため、interaction.user.botはfalseのはず。
+    }
+
+    // 授与者（userオプション）のBOTチェック（dummyTがない場合）
+    if (takerUser && takerUser.bot) {
+      return ['error', errors.isBot];
+    }
+    
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const uni = uniResult.rows[0]?.currency_name || 'P';
 
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const ini = iniResult.rows[0]?.initial_points || 0;
-
-    // ユーザーIDが存在しない場合はエラー
-    if (!takerId) {
-      return ['error', errors.missingUser];
-    }
 
     const SELECTUSER = `SELECT have_money FROM server_users_bank WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
 
@@ -132,13 +147,32 @@ async function MoneyPay(dbClient, interaction, pointO, guildO, dummyG, dummyT, u
   }
 }
 
+/**
+ * データベースで所持金を取得する
+ * @param {object} dbClient - PostgreSQLデータベースクライアント
+ * @param {object} interaction - Discordインタラクションオブジェクト
+ * @param {string} guildO - ギルドIDのオーバーライド
+ * @param {string} dummy - ユーザーIDのオーバーライド
+ */
 async function MoneyHave(dbClient, interaction, guildO, dummy) {
   try {
     await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
 
-    // 贈与者と授与者のIDとポイントを取得
-    const userId = dummy || interaction.options.getUser('user')?.id || interaction.user.id;
+    // ユーザーIDとユーザーオブジェクトを取得
+    const userOption = interaction.options.getUser('user'); // ユーザーオブジェクト
+    const userId = dummy || userOption?.id || interaction.user.id;
     const guildId = guildO || interaction.guild.id;
+
+    // ユーザーIDが存在しない場合はエラー
+    if (!userId) {
+      return ['error', errors.missingUser];
+    }
+    
+    // ユーザー（userオプション）のBOTチェック
+    // dummyでない、かつ、ユーザーオプションが存在する、かつ、それがボットである場合
+    if (!dummy && userOption && userOption.bot) {
+      return ['error', errors.isBot];
+    }
 
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
@@ -147,14 +181,9 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
     const iniResult = await dbClient.query(`SELECT initial_points FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
     const ini = iniResult.rows[0]?.initial_points || 0;
 
-    // ユーザーIDが存在しない場合はエラー
-    if (!userId) {
-      return ['error', errors.missingUser];
-    }
-
     const SELECTUSER = `SELECT have_money FROM server_users_bank WHERE server_id = $1 AND user_id = $2 LIMIT 1`;
 
-    // 贈与者と授与者の口座情報を取得
+    // ユーザーの口座情報を取得
     const userResult = await dbClient.query(SELECTUSER, [guildId, userId]);
     const userHave = userResult.rows[0]?.have_money || ini;
 
@@ -166,14 +195,34 @@ async function MoneyHave(dbClient, interaction, guildO, dummy) {
   }
 }
 
+/**
+ * データベースで所持金を設定する
+ * @param {object} dbClient - PostgreSQLデータベースクライアント
+ * @param {object} interaction - Discordインタラクションオブジェクト
+ * @param {Number} pointO - pointのオーバーライド
+ * @param {string} guildO - ギルドIDのオーバーライド
+ * @param {string} dummy - ユーザーIDのオーバーライド
+ */
 async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
   try {
     await createTables(dbClient); // テーブルの存在を確認し、必要に応じて作成
 
-    // 贈与者と授与者のIDとポイントを取得
-    const userId = dummy || interaction.options.getUser('user')?.id;
+    // ユーザーIDとユーザーオブジェクトを取得
+    const userOption = interaction.options.getUser('user'); // ユーザーオブジェクト
+    const userId = dummy || userOption?.id;
     const point = pointO || interaction.options.getInteger('point');
     const guildId = guildO || interaction.guild.id;
+
+    // ユーザーIDが存在しない場合はエラー
+    if (!userId) {
+      return ['error', errors.missingUser];
+    }
+    
+    // ユーザー（userオプション）のBOTチェック
+    // dummyでない、かつ、ユーザーオプションが存在する、かつ、それがボットである場合
+    if (!dummy && userOption && userOption.bot) {
+      return ['error', errors.isBot];
+    }
 
     // サーバーごとの通貨名を取得
     const uniResult = await dbClient.query(`SELECT currency_name FROM servers_bank WHERE server_id = $1 LIMIT 1`, [guildId]);
@@ -182,7 +231,7 @@ async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
     // データベースの更新をトランザクションで実行
     await dbClient.query('BEGIN');
     try {
-      // 贈与者の残高を更新
+      // ユーザーの残高を更新
       await dbClient.query(`INSERT INTO server_users_bank (server_id, user_id, have_money) VALUES ($1, $2, $3) ON CONFLICT (server_id, user_id) DO UPDATE SET have_money = EXCLUDED.have_money RETURNING have_money`, [guildId, userId, point]);
       await dbClient.query('COMMIT');
     } catch (dbError) {
@@ -197,6 +246,8 @@ async function SetMoney(dbClient, interaction, pointO, guildO, dummy) {
     return ['error', '予期せぬエラーが発生しました。'];
   }
 }
+
+// 以下の関数はユーザー操作に関連しないため、修正は不要です。
 
 async function SetCurrency(dbClient, interaction, guildO) {
   try {
