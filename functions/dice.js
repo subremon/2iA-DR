@@ -131,7 +131,7 @@ function BasicDice(command) {
   const formattedCommand = fixed_matches.map(m => m[0]).join('');
 
   // 途中の計算式が必要な場合のみ ` --> ...` を追加
-  const middleWorkStr = finalMiddleWork.join(' ');
+  const middleWorkStr = finalMiddleWork.join('');
   const resultStr = `${formattedCommand} --> ${middleWorkStr === String(finalSum) ? '' : `${middleWorkStr} --> `}${finalSum}`;
   
   return [resultStr, finalRollResults];
