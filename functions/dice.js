@@ -48,8 +48,7 @@ function getRandomInt(min, max) {
  * @returns {array} 結果テキスト, 個別ロール結果
  */
 function BasicDice(command) {
-  // 正規表現: 英字直前にない d/R のダイス表記 or 数字
-  const regex = /(?<![a-zA-Z])(\d*)([dR])(\d+)|([+\-*\/]?\d+)/gi;
+  const regex = /([+\-*\/]?\d*[dR]\d+)|([+\-*\/]?\d+)/gi;
   const matches = [...command.matchAll(regex)];
 
   if (!matches.length) return ['無効なコマンド形式です。', null];
@@ -59,12 +58,17 @@ function BasicDice(command) {
   let midlleWork = [];
 
   for (let m of matches) {
-    if (m[2]) { // ダイス表記
-      const operator = m[1] && m[1].match(/[+\-*\/]/) ? m[1] : '+';
-      const number = m[1] ? Number(m[1]) : 1;
-      const faces = Number(m[3]);
+    if (m[1]) { // ダイス表記
+      const el = m[1];
+      const operatorMatch = el.match(/^[+\-*\/]/);
+      const operator = operatorMatch ? operatorMatch[0] : '+';
 
-      if (number < 1 || faces < 1) return [`${command} --> x error: 数字は1以上にしてください。`, null];
+      const parts = el.replace(/^[+\-*\/]/, '').match(/(\d*)([dR])(\d+)/);
+      const number = parts[1] ? Number(parts[1]) : 1;
+      const faces = Number(parts[3]);
+
+      if (number < 1 || faces < 1) 
+        return [`${command} --> x error: 数字は1以上にしてください。`, null];
 
       let rolls = [];
       for (let j = 0; j < number; j++) {
@@ -73,33 +77,21 @@ function BasicDice(command) {
       const total = rolls.reduce((a, b) => a + b, 0);
 
       rollResults.push({operator, number, faces, rolls, total});
-      if (midlleWork.length === 0) {
-        // 1個目は + を省略
-        midlleWork.push(`${total}[${rolls.join(',')}]`);
-      } else {
-        midlleWork.push(`${operator}${total}[${rolls.join(',')}]`);
-      }
+      midlleWork.push(`${operator}${total}[${rolls.join(',')}]`);
 
-
-      // 演算
       if (operator === '+') sumAll += total;
       else if (operator === '-') sumAll -= total;
       else if (operator === '*') sumAll *= total;
       else if (operator === '/') sumAll /= total;
 
-    } else if (m[4]) { // 数字
-      let el = m[4];
-      const operatorMatch = el.match(/[+\-*\/]/);
+    } else if (m[2]) { // 数字
+      const el = m[2];
+      const operatorMatch = el.match(/^[+\-*\/]/);
       const operator = operatorMatch ? operatorMatch[0] : '+';
-      const num = Number(el.replace(/[+\-*\/]/, ''));
+      const num = Number(el.replace(/^[+\-*\/]/, ''));
 
       rollResults.push({operator, total: num});
-      if (midlleWork.length === 0) {
-        midlleWork.push(`${num}`);
-      } else {
-        midlleWork.push(`${operator}${num}`);
-      }
-
+      midlleWork.push(`${operator}${num}`);
 
       if (operator === '+') sumAll += num;
       else if (operator === '-') sumAll -= num;
@@ -109,14 +101,7 @@ function BasicDice(command) {
   }
 
   const formattedCommand = matches.map(m => m[0]).join('');
-  return [`${formattedCommand} --> ${midlleWork[0] === sumAll ? `${midlleWork.join(' ')} --> ` : ``}${sumAll}`, rollResults];
-}
-
-// 1~maxの整数を返すユーティリティ
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  return [`${formattedCommand} --> ${midlleWork.join(' ')} --> ${sumAll}`, rollResults];
 }
 
 // ^^ とりあえず仮
