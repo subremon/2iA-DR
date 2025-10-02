@@ -48,32 +48,39 @@ function getRandomInt(min, max) {
  * @returns {array} 結果テキスト, 個別ロール結果
  */
 function BasicDice(command) {
-  const regex = /([+\-*\/]?\d*[dR]\d+)|([+\-*\/]?\d+)/gi;
-  const matches = [...command.matchAll(regex)];
+  // r/d の前に必ず数字を付ける形でマッチ（ただし先頭だけ例外処理）
+  const regex = /([+\-*\/]?\d+[dR]\d+)|([+\-*\/]?\d+)/gi;
+  let matches = [...command.matchAll(regex)];
 
   if (!matches.length) return ['無効なコマンド形式です。', null];
+
+  // 先頭だけ "d6" や "r5" を許可して補正する
+  const head = command.trim().match(/^([dR]\d+)/i);
+  if (head) {
+    matches = [head, ...matches]; // 先頭に補正トークンを追加
+  }
 
   let sumAll = 0;
   let rollResults = [];
   let midlleWork = [];
 
-  for (let m of matches) {
-    if (m[1]) { // ダイス表記
-      const el = m[1];
-      const operatorMatch = el.match(/^[+\-*\/]/);
-      const operator = operatorMatch ? operatorMatch[0] : '+';
+  for (let i = 0; i < matches.length; i++) {
+    const m = matches[i];
 
-      const parts = el.replace(/^[+\-*\/]/, '').match(/(\d*)([dR])(\d+)/);
+    const token = m[0];
+    if (/[dR]/i.test(token)) { // ダイス表記
+      const operatorMatch = token.match(/^[+\-*\/]/);
+      const operator = operatorMatch ? operatorMatch[0] : (i === 0 ? '+' : '+'); // 先頭は暗黙に +
+      const parts = token.replace(/^[+\-*\/]/, '').match(/(\d*)([dR])(\d+)/);
+
+      // 先頭で数が省略されていた場合は1扱い
       const number = parts[1] ? Number(parts[1]) : 1;
       const faces = Number(parts[3]);
 
-      if (number < 1 || faces < 1) 
+      if (number < 1 || faces < 1)
         return [`${command} --> x error: 数字は1以上にしてください。`, null];
 
-      let rolls = [];
-      for (let j = 0; j < number; j++) {
-        rolls.push(getRandomInt(1, faces));
-      }
+      const rolls = Array.from({length: number}, () => getRandomInt(1, faces));
       const total = rolls.reduce((a, b) => a + b, 0);
 
       rollResults.push({operator, number, faces, rolls, total});
@@ -84,8 +91,8 @@ function BasicDice(command) {
       else if (operator === '*') sumAll *= total;
       else if (operator === '/') sumAll /= total;
 
-    } else if (m[2]) { // 数字
-      const el = m[2];
+    } else { // 数字
+      const el = token;
       const operatorMatch = el.match(/^[+\-*\/]/);
       const operator = operatorMatch ? operatorMatch[0] : '+';
       const num = Number(el.replace(/^[+\-*\/]/, ''));
