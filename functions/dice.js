@@ -48,76 +48,98 @@ function getRandomInt(min, max) {
  * @returns {array} 結果テキスト, 個別ロール結果
  */
 function BasicDice(command) {
-  // 正規表現: 英字直前にない d/R のダイス表記 or 数字
-  if (/^[dR]\d+/i) command = '1' + command;
-  const regex = /(?<![a-zA-Z])(\d+)([dR])(\d+)|([+\-*\/]?\d+)/gi;
-  const matches = [...command.matchAll(regex)];
+  // d/R のダイス表記が先頭に来た場合、'1'を付与 (例: d6 -> 1d6)
+  if (/^[dR]\d+/i.test(command)) {
+    command = '1' + command;
+  }
+  
+  // 修正後の正規表現: 
+  // (1) Op(N Dice Faces) : ([+\-*\/]?)(\d+)([dR])(\d+) 
+  //     -> m[1]: Op, m[2]: Num, m[3]: d/R, m[4]: Faces
+  // (2) Op(Number) : ([+\-*\/]?\d+) 
+  //     -> m[5]: OpNum (演算子付き数字、例: +3, -10)
+  const fixed_regex = /([+\-*\/]?)(\d+)([dR])(\d+)|([+\-*\/]?\d+)/gi;
+  const fixed_matches = [...command.matchAll(fixed_regex)];
 
-  if (!matches.length) return ['無効なコマンド形式です。', null];
+  if (!fixed_matches.length) return ['無効なコマンド形式です。', null];
 
-  let sumAll = 0;
-  let rollResults = [];
-  let midlleWork = [];
+  let finalSum = 0;
+  let finalRollResults = [];
+  let finalMiddleWork = [];
 
-  for (let m of matches) {
-    if (m[2]) { // ダイス表記
-      const operator = m[1] && m[1].match(/[+\-*\/]/) ? m[1] : '+';
-      const number = m[1] ? Number(m[1]) : 1;
-      const faces = Number(m[3]);
+  for (let i = 0; i < fixed_matches.length; i++) {
+      const m = fixed_matches[i];
+      
+      if (m[3]) { // (1) ダイス表記の処理
+          // 演算子を抽出 (1個目以外で空の場合はエラーの可能性もあるが、ここでは '+' と見なす)
+          const op = m[1] || (i === 0 ? '+' : ''); 
+          const number = Number(m[2]);
+          const faces = Number(m[4]);
 
-      if (number < 1 || faces < 1) return [`${command} --> x error: 数字は1以上にしてください。`, null];
+          if (number < 1 || faces < 1) return [`${command} --> x error: 数字は1以上にしてください。`, null];
 
-      let rolls = [];
-      for (let j = 0; j < number; j++) {
-        rolls.push(getRandomInt(1, faces));
+          let rolls = [];
+          for (let j = 0; j < number; j++) {
+              rolls.push(getRandomInt(1, faces));
+          }
+          const total = rolls.reduce((a, b) => a + b, 0);
+
+          const actual_op = op || '+'; // 演算子がない場合は '+'
+          finalRollResults.push({ operator: actual_op, number, faces, rolls, total });
+          
+          const work_str = `${total}[${rolls.join(',')}]`;
+          // 中間式には演算子を付与
+          finalMiddleWork.push(op + work_str);
+
+          // 演算
+          if (actual_op === '+') finalSum += total;
+          else if (actual_op === '-') finalSum -= total;
+          else if (actual_op === '*') finalSum *= total;
+          else if (actual_op === '/') finalSum /= total;
+          
+      } else if (m[5]) { // (2) 数字の処理
+          let el = m[5]; // 例: '+3', '5', '-10'
+          
+          // 演算子を抽出
+          const operatorMatch = el.match(/[+\-*\/]/);
+          const op = operatorMatch ? operatorMatch[0] : (i === 0 ? '+' : ''); // 1個目の要素で演算子がない場合は '+'
+          
+          // 演算子を取り除いた数値を取得
+          const numStr = el.replace(/[+\-*\/]/, '');
+          const num = Number(numStr);
+          
+          const actual_op = op || '+'; // 演算子がない場合は '+'
+          finalRollResults.push({ operator: actual_op, total: num });
+          
+          // 中間式を整形 (1個目以外は演算子付きの文字列を使用)
+          if (i === 0 && !operatorMatch) {
+              finalMiddleWork.push(`${num}`); // 1個目で演算子なし
+          } else {
+              finalMiddleWork.push(`${el}`); // 演算子付き、または2個目以降
+          }
+          
+          // 演算
+          if (actual_op === '+') finalSum += num;
+          else if (actual_op === '-') finalSum -= num;
+          else if (actual_op === '*') finalSum *= num;
+          else if (actual_op === '/') finalSum /= num;
       }
-      const total = rolls.reduce((a, b) => a + b, 0);
-
-      rollResults.push({operator, number, faces, rolls, total});
-      if (midlleWork.length === 0) {
-        // 1個目は + を省略
-        midlleWork.push(`${total}[${rolls.join(',')}]`);
-      } else {
-        midlleWork.push(`${operator}${total}[${rolls.join(',')}]`);
-      }
-
-
-      // 演算
-      if (operator === '+') sumAll += total;
-      else if (operator === '-') sumAll -= total;
-      else if (operator === '*') sumAll *= total;
-      else if (operator === '/') sumAll /= total;
-
-    } else if (m[4]) { // 数字
-      let el = m[4];
-      const operatorMatch = el.match(/[+\-*\/]/);
-      const operator = operatorMatch ? operatorMatch[0] : '+';
-      const num = Number(el.replace(/[+\-*\/]/, ''));
-
-      rollResults.push({operator, total: num});
-      if (midlleWork.length === 0) {
-        midlleWork.push(`${num}`);
-      } else {
-        midlleWork.push(`${operator}${num}`);
-      }
-
-
-      if (operator === '+') sumAll += num;
-      else if (operator === '-') sumAll -= num;
-      else if (operator === '*') sumAll *= num;
-      else if (operator === '/') sumAll /= num;
-    }
   }
 
-  const formattedCommand = matches.map(m => m[0]).join('');
-  return [`${formattedCommand} --> ${midlleWork.length === 1 && midlleWork[0] === sumAll ? `${midlleWork.join(' ')} --> ` : ``}${sumAll}`, rollResults];
-}
+  // 表示の整形: 1個目の要素がダイス/数字で、`+` から始まっている場合は削除
+  if (finalMiddleWork.length > 0 && finalMiddleWork[0].startsWith('+')) {
+      // ダイス結果（例: `+3[1,2]`）か数字（例: `+5`）かを問わず、先頭の `+` を削除
+      finalMiddleWork[0] = finalMiddleWork[0].substring(1);
+  }
+  
+  // コマンドの整形 (マッチした文字列を結合し、元の形式に近づける)
+  const formattedCommand = fixed_matches.map(m => m[0]).join('');
 
-// 1~maxの整数を返すユーティリティ
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  // 途中の計算式が必要な場合のみ ` --> ...` を追加
+  const middleWorkStr = finalMiddleWork.join(' ');
+  const resultStr = `${formattedCommand} --> ${middleWorkStr === String(finalSum) ? '' : `${middleWorkStr} --> `}${finalSum}`;
+  
+  return [resultStr, finalRollResults];
 }
 
 // ^^ とりあえず仮
