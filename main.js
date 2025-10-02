@@ -22,7 +22,7 @@ module.exports = function(client) {
       if (basicDiceRegex.test(msg.content)) {
         const command = msg.content.match(basicDiceRegex)[0].replaceAll(/\s/g, '');
         const result = CreateEmbed({ title: BasicDice(command)[0], color: '#00bfff', author: { name: msg.author.username, iconURL: msg.author.displayAvatarURL({ dynamic: true, size: 256 }) } });
-        SafeMessage(client, msg, {embeds: result}, 'send');
+        SafeMessage(client, msg, { embeds: [result] }, 'send');
       }
 
       if (msg.mentions.users.has(client.user.id)) {
