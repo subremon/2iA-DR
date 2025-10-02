@@ -109,7 +109,7 @@ function BasicDice(command) {
   }
 
   const formattedCommand = matches.map(m => m[0]).join('');
-  return [`${formattedCommand} --> ${midlleWork.join(' ')} --> ${sumAll}`, rollResults];
+  return [`${formattedCommand} --> ${midlleWork[0] === sumAll ? `${midlleWork.join(' ')} --> ` : ``}${sumAll}`, rollResults];
 }
 
 // 1~maxの整数を返すユーティリティ

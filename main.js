@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
 const cron = require('node-cron');
-const { SafeMessage, GetDiscord } = require('./functions/safety.js');
+const { CreateEmbed, SafeMessage, GetDiscord } = require('./functions/safety.js');
 const { BasicDice }= require('./functions/dice.js');
 
 module.exports = function(client) {
@@ -21,7 +21,8 @@ module.exports = function(client) {
       const basicDiceRegex = /^(?!.*https?:\/\/)(-?\d+)?([+\-*\/]\s?\d+)*\s?([+\-*\/]?\s?(?<![a-zA-Z])\d*\s?[R]\s?\d+)+((\s?[+\-*\/]\s?\d+)|([+\-*\/](?<![a-zA-Z])\d*\s?[R]\d+\s?))*/i;
       if (basicDiceRegex.test(msg.content)) {
         const command = msg.content.match(basicDiceRegex)[0].replaceAll(/\s/g, '');
-        SafeMessage(client, msg, BasicDice(command)[0]);
+        const result = CreateEmbed({title: BasicDice(command)[0], color: '#00bfff', author: msg.author})
+        SafeMessage(client, msg, {embeds: result}, 'send');
       }
 
       if (msg.mentions.users.has(client.user.id)) {

@@ -90,44 +90,53 @@ async function GetDiscord(client, guildId, channelId = null) {
  * 安全にメッセージを送信するためのヘルパー関数
  * @param {import('discord.js').Client} client - DiscordClientインスタンス
  * @param {import('discord.js').Message} msg - Discordメッセージオブジェクト
- * @param {string} text - 送信するテキスト
- * @param {string} type - 'send', 'reply' のいずれか
+ * @param {string|object} contentOrOptions - 送信するテキスト or MessageOptionsオブジェクト
+ * @param {string} type - 'send', 'reply', 'dm' のいずれか
  * @param {boolean} silent - サイレントメッセージかどうか
  * @param {number} delay - 送信前の遅延時間(ms)
- * @returns {Promise<import('discord.js').Message>|void} - 送信されたメッセージのPromise、またはvoid
+ * @returns {Promise<import('discord.js').Message>|void}
  */
-async function SafeMessage(client, msg, text, type = 'send', silent = false, delay = 0) {
-// embeds, components, stickers, files, attachments, tts, silent, nonce, flags を後で追加
+async function SafeMessage(client, msg, contentOrOptions, type = 'send', silent = false, delay = 0) {
   try {
-    const messageOptions = {
-        content: text,
-        flags: silent ? MessageFlags.SuppressNotifications : 0
-    };
+    // メッセージオプションの組み立て
+    let messageOptions = {};
+
+    if (typeof contentOrOptions === "string") {
+      // stringの場合 → contentとして扱う
+      messageOptions.content = contentOrOptions;
+    } else if (typeof contentOrOptions === "object" && contentOrOptions !== null) {
+      // objectの場合 →そのまま展開
+      messageOptions = { ...contentOrOptions };
+    }
+
+    // silentオプション反映
+    messageOptions.flags = silent ? MessageFlags.SuppressNotifications : messageOptions.flags ?? 0;
 
     // DMの場合
     if (type === 'dm' || !msg.guild) {
-        return await msg.author.send(messageOptions);
+      return await msg.author.send(messageOptions);
     }
 
     // ギルド（サーバー）の場合
     const botPermissions = msg.channel.permissionsFor(client.user.id);
-
     if (!botPermissions || !botPermissions.has('SendMessages')) {
-        console.error(`❌ Botはこのチャンネルでメッセージを送信できません: ${msg.channel.name}`);
-        return await msg.author.send({
-            content: `${msg.guild.name}の${msg.channel}でメッセージに対応しようとしましたが、失敗しました。\nそのチャンネルでBOTがメッセージを送信可能か確認してください。`
-        });
-    }
-    
-    if (delay > 0) {
-        await msg.channel.sendTyping();
-        await new Promise(resolve => setTimeout(resolve, delay));
+      console.error(`❌ Botはこのチャンネルでメッセージを送信できません: ${msg.channel.name}`);
+      return await msg.author.send({
+        content: `${msg.guild.name} の ${msg.channel} でメッセージに対応しようとしましたが失敗しました。\nそのチャンネルでBOTがメッセージを送信可能か確認してください。`
+      });
     }
 
+    // 遅延処理
+    if (delay > 0) {
+      await msg.channel.sendTyping();
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+
+    // 送信モード
     if (type === 'send') {
-        return await msg.channel.send(messageOptions);
+      return await msg.channel.send(messageOptions);
     } else if (type === 'reply') {
-        return await msg.reply(messageOptions);
+      return await msg.reply(messageOptions);
     }
 
   } catch (err) {
