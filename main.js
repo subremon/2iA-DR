@@ -18,7 +18,7 @@ module.exports = function(client) {
     client.on(Events.MessageCreate, (msg) => {
       if (msg.author.bot) return;
       
-      const basicDiceRegex = /^(?!.*https?:\/\/)(-?\d+)?([+\-*\/]\s?\d+)*\s?([+\-*\/]?\s?(?<![a-zA-Z])\d*\s?[R]\s?\d+)+((\s?[+\-*\/]\s?\d+)|([+\-*\/](?<![a-zA-Z])\d*\s?[R]\d+\s?))*/i;
+      const basicDiceRegex = /^(?!.*https?:\/\/)(-?\d+)?([+\-*\/]\s?\d+)*\s?([+\-*\/]?\s?(?<![a-zA-Z])\d*\s?[R]\s?\d+)+((\s?[+\-*\/]\s?\d+)|([+\-*\/](?<![a-zA-Z])\d+\s?[R]\d+\s?))*/i;
       if (basicDiceRegex.test(msg.content)) {
         const command = msg.content.match(basicDiceRegex)[0].replaceAll(/\s/g, '');
         const result = CreateEmbed({ title: BasicDice(command)[0], color: '#00bfff', author: { name: msg.author.username, iconURL: msg.author.displayAvatarURL({ dynamic: true, size: 256 }) } });

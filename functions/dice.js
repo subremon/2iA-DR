@@ -53,11 +53,7 @@ function BasicDice(command) {
     command = '1' + command;
   }
   
-  // 修正後の正規表現: 
-  // (1) Op(N Dice Faces) : ([+\-*\/]?)(\d+)([dR])(\d+) 
-  //     -> m[1]: Op, m[2]: Num, m[3]: d/R, m[4]: Faces
-  // (2) Op(Number) : ([+\-*\/]?\d+) 
-  //     -> m[5]: OpNum (演算子付き数字、例: +3, -10)
+  // 正規表現: ([+\-*\/]?)(\d+)([dR])(\d+)|([+\-*\/]?\d+)
   const fixed_regex = /([+\-*\/]?)(\d+)([dR])(\d+)|([+\-*\/]?\d+)/gi;
   const fixed_matches = [...command.matchAll(fixed_regex)];
 
@@ -70,8 +66,7 @@ function BasicDice(command) {
   for (let i = 0; i < fixed_matches.length; i++) {
       const m = fixed_matches[i];
       
-      if (m[3]) { // (1) ダイス表記の処理
-          // 演算子を抽出 (1個目以外で空の場合はエラーの可能性もあるが、ここでは '+' と見なす)
+      if (m[3]) { // ダイス表記の処理
           const op = m[1] || (i === 0 ? '+' : ''); 
           const number = Number(m[2]);
           const faces = Number(m[4]);
@@ -84,11 +79,15 @@ function BasicDice(command) {
           }
           const total = rolls.reduce((a, b) => a + b, 0);
 
-          const actual_op = op || '+'; // 演算子がない場合は '+'
+          const actual_op = op || '+';
           finalRollResults.push({ operator: actual_op, number, faces, rolls, total });
           
-          const work_str = `${total}[${rolls.join(',')}]`;
-          // 中間式には演算子を付与
+          // ★★★ 修正箇所 ★★★
+          // 振る回数が1回の場合 (number === 1) は [] を省略
+          const work_str = (number === 1) 
+              ? `${total}` 
+              : `${total}[${rolls.join(',')}]`;
+              
           finalMiddleWork.push(op + work_str);
 
           // 演算
@@ -97,25 +96,22 @@ function BasicDice(command) {
           else if (actual_op === '*') finalSum *= total;
           else if (actual_op === '/') finalSum /= total;
           
-      } else if (m[5]) { // (2) 数字の処理
-          let el = m[5]; // 例: '+3', '5', '-10'
+      } else if (m[5]) { // 数字の処理
+          let el = m[5];
           
-          // 演算子を抽出
           const operatorMatch = el.match(/[+\-*\/]/);
-          const op = operatorMatch ? operatorMatch[0] : (i === 0 ? '+' : ''); // 1個目の要素で演算子がない場合は '+'
+          const op = operatorMatch ? operatorMatch[0] : (i === 0 ? '+' : '');
           
-          // 演算子を取り除いた数値を取得
           const numStr = el.replace(/[+\-*\/]/, '');
           const num = Number(numStr);
           
-          const actual_op = op || '+'; // 演算子がない場合は '+'
+          const actual_op = op || '+';
           finalRollResults.push({ operator: actual_op, total: num });
           
-          // 中間式を整形 (1個目以外は演算子付きの文字列を使用)
           if (i === 0 && !operatorMatch) {
-              finalMiddleWork.push(`${num}`); // 1個目で演算子なし
+              finalMiddleWork.push(`${num}`);
           } else {
-              finalMiddleWork.push(`${el}`); // 演算子付き、または2個目以降
+              finalMiddleWork.push(`${el}`);
           }
           
           // 演算
@@ -126,13 +122,12 @@ function BasicDice(command) {
       }
   }
 
-  // 表示の整形: 1個目の要素がダイス/数字で、`+` から始まっている場合は削除
+  // 表示の整形: 1個目の要素が + から始まっている場合は削除
   if (finalMiddleWork.length > 0 && finalMiddleWork[0].startsWith('+')) {
-      // ダイス結果（例: `+3[1,2]`）か数字（例: `+5`）かを問わず、先頭の `+` を削除
+      // ダイス結果か数字かを問わず、先頭の + を削除
       finalMiddleWork[0] = finalMiddleWork[0].substring(1);
   }
   
-  // コマンドの整形 (マッチした文字列を結合し、元の形式に近づける)
   const formattedCommand = fixed_matches.map(m => m[0]).join('');
 
   // 途中の計算式が必要な場合のみ ` --> ...` を追加
