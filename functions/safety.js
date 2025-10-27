@@ -36,7 +36,7 @@ function CreateEmbed(options) {
   if (color) embed.setColor(color);
   if (author) embed.setAuthor(author);
   if (footer) embed.setFooter(footer);
-  if (timestamp) embed.setTimestamp(timestamp);
+  if (timestamp != false) embed.setTimestamp();
   if (url) embed.setURL(url);
   if (thumbnail) embed.setThumbnail(thumbnail);
   if (image) embed.setImage(image);
