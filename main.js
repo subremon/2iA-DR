@@ -21,7 +21,7 @@ module.exports = function(client) {
       const basicDiceRegex = /^(?!.*https?:\/\/)(-?\d+)?([+\-*\/]\s?\d+)*\s?([+\-*\/]?\s?(?<![a-zA-Z])\d*\s?[R]\s?\d+)+((\s?[+\-*\/]\s?\d+)|([+\-*\/](?<![a-zA-Z])\d+\s?[R]\d+\s?))*/i;
       if (basicDiceRegex.test(msg.content)) {
         const command = msg.content.match(basicDiceRegex)[0].replaceAll(/\s/g, '');
-        const result = CreateEmbed({ description: BasicDice(command)[0], color: '#00bfff', author: { name: msg.member.displayName, iconURL: msg.author.displayAvatarURL({ dynamic: true, size: 256 }), timestamp: new Date() } });
+        const result = CreateEmbed({ description: BasicDice(command)[0], color: '#00bfff', author: { name: msg.member.displayName, iconURL: msg.author.displayAvatarURL({ dynamic: true, size: 256 }), timestamp: true } });
         SafeMessage(client, msg, { embeds: [result] }, 'send');
         msg.delete().catch(error => {
             if (error.code !== 10008) {
